@@ -1,0 +1,54 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+  <circle cx="160" cy="160" r="141" fill="none" stroke="#ffffff" stroke-width="5"/>
+  <circle cx="160" cy="160" r="146" fill="none" stroke="#ffd0e2" stroke-width="1.5"/>
+  <circle cx="160" cy="160" r="156" fill="none" stroke="#7fbf8e" stroke-width="2.5" stroke-dasharray="7 5" opacity="0.9"/>
+  <circle cx="160" cy="160" r="151" fill="none" stroke="#a8d8b0" stroke-width="2" stroke-dasharray="3 7" opacity="0.95"/>
+  <g transform="translate(310 160)" fill="#ffc4d8">
+    <circle cx="0" cy="-5" r="4.6"/><circle cx="4.8" cy="-1.6" r="4.6"/><circle cx="3" cy="4.2" r="4.6"/><circle cx="-3" cy="4.2" r="4.6"/><circle cx="-4.8" cy="-1.6" r="4.6"/>
+    <circle cx="0" cy="0" r="3" fill="#fff6e8"/>
+  </g>
+  <ellipse transform="translate(300.4 218.2) rotate(112.5)" rx="8" ry="3.5" fill="#9fd8a8" stroke="#7fbf8e" stroke-width="0.6"/>
+  <ellipse transform="translate(304.1 219.7) rotate(292.5)" rx="5.5" ry="2.4" fill="#b8e6c0" stroke="#7fbf8e" stroke-width="0.5"/>
+  <g transform="translate(266.1 266.1)" fill="#ffb6d0">
+    <circle cx="0" cy="-5" r="4.6"/><circle cx="4.8" cy="-1.6" r="4.6"/><circle cx="3" cy="4.2" r="4.6"/><circle cx="-3" cy="4.2" r="4.6"/><circle cx="-4.8" cy="-1.6" r="4.6"/>
+    <circle cx="0" cy="0" r="3" fill="#fff6e8"/>
+  </g>
+  <ellipse transform="translate(218.2 300.4) rotate(157.5)" rx="8" ry="3.5" fill="#9fd8a8" stroke="#7fbf8e" stroke-width="0.6"/>
+  <ellipse transform="translate(219.7 304.1) rotate(337.5)" rx="5.5" ry="2.4" fill="#b8e6c0" stroke="#7fbf8e" stroke-width="0.5"/>
+  <g transform="translate(160 310)" fill="#ffc4d8">
+    <circle cx="0" cy="-5" r="4.6"/><circle cx="4.8" cy="-1.6" r="4.6"/><circle cx="3" cy="4.2" r="4.6"/><circle cx="-3" cy="4.2" r="4.6"/><circle cx="-4.8" cy="-1.6" r="4.6"/>
+    <circle cx="0" cy="0" r="3" fill="#fff6e8"/>
+  </g>
+  <ellipse transform="translate(101.8 300.4) rotate(202.5)" rx="8" ry="3.5" fill="#9fd8a8" stroke="#7fbf8e" stroke-width="0.6"/>
+  <ellipse transform="translate(100.3 304.1) rotate(382.5)" rx="5.5" ry="2.4" fill="#b8e6c0" stroke="#7fbf8e" stroke-width="0.5"/>
+  <g transform="translate(53.9 266.1)" fill="#ffb6d0">
+    <circle cx="0" cy="-5" r="4.6"/><circle cx="4.8" cy="-1.6" r="4.6"/><circle cx="3" cy="4.2" r="4.6"/><circle cx="-3" cy="4.2" r="4.6"/><circle cx="-4.8" cy="-1.6" r="4.6"/>
+    <circle cx="0" cy="0" r="3" fill="#fff6e8"/>
+  </g>
+  <ellipse transform="translate(19.6 218.2) rotate(247.5)" rx="8" ry="3.5" fill="#9fd8a8" stroke="#7fbf8e" stroke-width="0.6"/>
+  <ellipse transform="translate(15.9 219.7) rotate(427.5)" rx="5.5" ry="2.4" fill="#b8e6c0" stroke="#7fbf8e" stroke-width="0.5"/>
+  <g transform="translate(10 160)" fill="#ffc4d8">
+    <circle cx="0" cy="-5" r="4.6"/><circle cx="4.8" cy="-1.6" r="4.6"/><circle cx="3" cy="4.2" r="4.6"/><circle cx="-3" cy="4.2" r="4.6"/><circle cx="-4.8" cy="-1.6" r="4.6"/>
+    <circle cx="0" cy="0" r="3" fill="#fff6e8"/>
+  </g>
+  <ellipse transform="translate(19.6 101.8) rotate(292.5)" rx="8" ry="3.5" fill="#9fd8a8" stroke="#7fbf8e" stroke-width="0.6"/>
+  <ellipse transform="translate(15.9 100.3) rotate(472.5)" rx="5.5" ry="2.4" fill="#b8e6c0" stroke="#7fbf8e" stroke-width="0.5"/>
+  <g transform="translate(53.9 53.9)" fill="#ffb6d0">
+    <circle cx="0" cy="-5" r="4.6"/><circle cx="4.8" cy="-1.6" r="4.6"/><circle cx="3" cy="4.2" r="4.6"/><circle cx="-3" cy="4.2" r="4.6"/><circle cx="-4.8" cy="-1.6" r="4.6"/>
+    <circle cx="0" cy="0" r="3" fill="#fff6e8"/>
+  </g>
+  <ellipse transform="translate(101.8 19.6) rotate(337.5)" rx="8" ry="3.5" fill="#9fd8a8" stroke="#7fbf8e" stroke-width="0.6"/>
+  <ellipse transform="translate(100.3 15.9) rotate(517.5)" rx="5.5" ry="2.4" fill="#b8e6c0" stroke="#7fbf8e" stroke-width="0.5"/>
+  <g transform="translate(160 10)" fill="#ffc4d8">
+    <circle cx="0" cy="-5" r="4.6"/><circle cx="4.8" cy="-1.6" r="4.6"/><circle cx="3" cy="4.2" r="4.6"/><circle cx="-3" cy="4.2" r="4.6"/><circle cx="-4.8" cy="-1.6" r="4.6"/>
+    <circle cx="0" cy="0" r="3" fill="#fff6e8"/>
+  </g>
+  <ellipse transform="translate(218.2 19.6) rotate(382.5)" rx="8" ry="3.5" fill="#9fd8a8" stroke="#7fbf8e" stroke-width="0.6"/>
+  <ellipse transform="translate(219.7 15.9) rotate(562.5)" rx="5.5" ry="2.4" fill="#b8e6c0" stroke="#7fbf8e" stroke-width="0.5"/>
+  <g transform="translate(266.1 53.9)" fill="#ffb6d0">
+    <circle cx="0" cy="-5" r="4.6"/><circle cx="4.8" cy="-1.6" r="4.6"/><circle cx="3" cy="4.2" r="4.6"/><circle cx="-3" cy="4.2" r="4.6"/><circle cx="-4.8" cy="-1.6" r="4.6"/>
+    <circle cx="0" cy="0" r="3" fill="#fff6e8"/>
+  </g>
+  <ellipse transform="translate(300.4 101.8) rotate(427.5)" rx="8" ry="3.5" fill="#9fd8a8" stroke="#7fbf8e" stroke-width="0.6"/>
+  <ellipse transform="translate(304.1 100.3) rotate(607.5)" rx="5.5" ry="2.4" fill="#b8e6c0" stroke="#7fbf8e" stroke-width="0.5"/>
+</svg>
