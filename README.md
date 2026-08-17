@@ -118,21 +118,7 @@ powershell -NoProfile -ExecutionPolicy Bypass -File uninstall.ps1
 
 ---
 
-## 🌐 发布到 GitHub
 
-1. 新建仓库（如 `dsh-neko-maid-theme`），不要勾选初始化 README
-2. 网页上传：直接把整个文件夹拖进仓库页面上传，或用命令行：
-   ```bash
-   git init
-   git add .
-   git commit -m "Neko Maid Theme v1.0"
-   git branch -M main
-   git remote add origin https://github.com/<你的用户名>/dsh-neko-maid-theme.git
-   git push -u origin main
-   ```
-   （本机装了 GitHub Desktop 也可以直接 Add repository → Publish，跳过命令行）
-
----
 
 ## ⚠️ 说明与许可
 
