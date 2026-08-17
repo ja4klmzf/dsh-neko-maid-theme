@@ -1,0 +1,35 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 320 320">
+  <circle cx="160" cy="160" r="141" fill="none" stroke="#ffffff" stroke-width="6"/>
+  <circle cx="160" cy="160" r="148" fill="none" stroke="#ffb6d0" stroke-width="2.5"/>
+  <circle cx="314" cy="160" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="310.6" cy="192" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="300.7" cy="222.6" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="284.6" cy="250.5" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="263" cy="274.4" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="237" cy="293.4" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="207.6" cy="306.5" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="176.1" cy="313.2" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="143.9" cy="313.2" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="112.4" cy="306.5" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="83" cy="293.4" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="57" cy="274.4" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="35.4" cy="250.5" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="19.3" cy="222.6" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="9.4" cy="192" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="6" cy="160" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="9.4" cy="128" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="19.3" cy="97.4" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="35.4" cy="69.5" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="57" cy="45.6" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="83" cy="26.6" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="112.4" cy="13.5" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="143.9" cy="6.8" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="176.1" cy="6.8" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="207.6" cy="13.5" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="237" cy="26.6" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="263" cy="45.6" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="284.6" cy="69.5" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="300.7" cy="97.4" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="310.6" cy="128" r="10.5" fill="#ffffff" stroke="#ffb6d0" stroke-width="1.2"/>
+  <circle cx="160" cy="160" r="141" fill="none" stroke="#ffe3ec" stroke-width="1.5" stroke-dasharray="3 5"/>
+</svg>
