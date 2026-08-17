@@ -1,0 +1,857 @@
+/* ============================================================
+   猫娘昼夜主题 v2 · Neko Day/Night Skin for DeepSeek Harness Web GUI
+   ------------------------------------------------------------
+   灵感组合自 Deep Whale 昼夜主题（水晶白昼 / 月潮夜晚 / 玻璃面板 /
+   花边 / 动态氛围 / Q版宠物），宠物与素材使用前面生成的猫娘。
+
+   用法（见 install-neko-daynight.ps1）：
+     1. 把 override.css / neko-theme.js / neko-bg-night.jpg 放到
+        dsh-web-frontend/dist/assets/
+     2. dist/index.html 里引入：
+          <link rel="stylesheet" href="/assets/override.css?v=N">
+          <script src="/assets/neko-theme.js" defer></script>
+     3. 服务器不发送缓存头，改动后必须把 ?v=N 版本号 +1。
+
+   模式机制：
+     - html[data-neko] 由 neko-theme.js 维护：day | night。
+     - 自动模式跟随 DSH 的 body[data-ds-dark-theme]（系统偏好/设置）。
+     - 页面底部右侧的 Q版猫娘是切换按钮：点一下 日→夜→自动。
+     注意：调色板全部 !important，能压过主题系统写入 body 的内联 token。
+   ============================================================ */
+
+/* ============================================================
+   日间 · 水晶白昼（樱花粉 + 奶油白）
+   选择器覆盖 :root / body / body[data-ds-dark-theme]，
+   保证手工“白天”模式也能压过 DSH 的深色属性。
+   ============================================================ */
+:root,
+body,
+body[data-ds-dark-theme] {
+  --dsw-alias-brand-primary: #ff7eb3 !important;
+  --dsw-alias-brand-primary-invert: #ffffff !important;
+  --dsw-alias-brand-primary-new-colorprimary-new-color: #ff7eb3 !important;
+  --dsw-alias-brand-text: #c2497a !important;
+
+  --dsw-alias-bg-base: #fff7fa !important;
+  --dsw-alias-bg-layer-1: #ffeff5 !important;
+  --dsw-alias-bg-layer-2: #ffe4ee !important;
+  --dsw-alias-bg-layer-3: #ffd8e7 !important;
+  --dsw-alias-bg-mask-1: rgba(255, 182, 205, 0.32) !important;
+  --dsw-alias-bg-mask-2: rgba(255, 182, 205, 0.45) !important;
+  --dsw-alias-bg-mask-3: rgba(255, 182, 205, 0.6) !important;
+  --dsw-alias-bg-mask-drop: rgba(255, 227, 236, 0.85) !important;
+  --dsw-alias-bg-mask-photo: rgba(255, 227, 236, 0.5) !important;
+  --dsw-alias-bg-module-platform: #fff1f7 !important;
+  --dsw-alias-bg-multi-select: #ffeaf2 !important;
+  --dsw-alias-bg-overlay: rgba(255, 246, 250, 0.94) !important;
+  --dsw-alias-bg-skeleton: rgba(255, 182, 205, 0.35) !important;
+
+  --dsw-alias-border-l1: rgba(255, 126, 179, 0.18) !important;
+  --dsw-alias-border-l2: rgba(255, 126, 179, 0.28) !important;
+  --dsw-alias-border-l2-darkmode-thin: rgba(255, 126, 179, 0.22) !important;
+  --dsw-alias-border-l3: rgba(255, 126, 179, 0.4) !important;
+  --dsw-alias-border-l4: rgba(255, 126, 179, 0.52) !important;
+  --dsw-alias-border-inverted: #ffd9e4 !important;
+  --dsw-alias-border-inverted2: #ffb6cd !important;
+
+  --dsw-alias-label-primary: #4a2b3a !important;
+  --dsw-alias-label-primary-bluish: #3d2b3a !important;
+  --dsw-alias-label-primary-dimmed: #8d6f80 !important;
+  --dsw-alias-label-primary-foreground: #ffffff !important;
+  --dsw-alias-label-primary-inverted: #4a2b3a !important;
+  --dsw-alias-label-secondary: #7a5a6b !important;
+  --dsw-alias-label-tertiary: #a8839a !important;
+  --dsw-alias-label-caption: #b39aaa !important;
+  --dsw-alias-label-dimmed: #9c8092 !important;
+
+  --dsw-alias-interactive-bg-hover: rgba(255, 126, 179, 0.12) !important;
+  --dsw-alias-interactive-bg-active: rgba(255, 126, 179, 0.2) !important;
+  --dsw-alias-interactive-bg-hover-accent: rgba(255, 126, 179, 0.14) !important;
+  --dsw-alias-interactive-bg-hover-danger: rgba(255, 90, 120, 0.1) !important;
+  --dsw-alias-interactive-bg-hover-solid: rgba(255, 126, 179, 0.16) !important;
+
+  --dsw-alias-button-primary-fill: #ff7eb3 !important;
+  --dsw-alias-button-primary-hover: #ff6aa7 !important;
+  --dsw-alias-button-primary-dimmed: rgba(255, 126, 179, 0.4) !important;
+  --dsw-alias-button-contrast-fill: #4a2b3a !important;
+  --dsw-alias-button-elevated-fill: #fff1f7 !important;
+  --dsw-alias-button-floating-fill: #fff5f9 !important;
+  --dsw-alias-button-floating-hover: #ffe9f2 !important;
+  --dsw-alias-button-ghost-active-fill: rgba(255, 126, 179, 0.12) !important;
+  --dsw-alias-button-ghost-active-hover: rgba(255, 126, 179, 0.2) !important;
+  --dsw-alias-button-ghost-active-border: rgba(255, 126, 179, 0.45) !important;
+  --dsw-alias-button-info-fill: #ffeaf2 !important;
+  --dsw-alias-button-info-hover: #ffdcec !important;
+  --dsw-alias-button-tool-bar-fill: transparent !important;
+  --dsw-alias-button-tool-bar-fill-invisible: transparent !important;
+  --dsw-alias-button-tool-bar-hover: rgba(255, 126, 179, 0.14) !important;
+
+  --dsw-alias-state-success-primary: #2fa87b !important;
+  --dsw-alias-state-success-secondary: rgba(47, 168, 123, 0.16) !important;
+  --dsw-alias-state-success-tertiary: #d3f2e4 !important;
+  --dsw-alias-state-warn-primary: #e8a23d !important;
+  --dsw-alias-state-warn-label: #b97a2f !important;
+  --dsw-alias-state-warn-secondary: rgba(232, 162, 61, 0.18) !important;
+  --dsw-alias-state-warn-tertiary: #faeacd !important;
+  --dsw-alias-state-error-primary: #e0607a !important;
+  --dsw-alias-state-error-secondary: rgba(224, 96, 122, 0.16) !important;
+  --dsw-alias-state-business-primary: #7f6cc4 !important;
+  --dsw-alias-state-business-tertiary: #e6e0f7 !important;
+
+  --dsw-alias-markdown-citation: #ff8fc0 !important;
+  --dsw-alias-markdown-code-block: #fff0f6 !important;
+  --dsw-alias-markdown-code-block-banner: #ffe7f1 !important;
+  --dsw-alias-markdown-code-segment-selected: rgba(255, 126, 179, 0.2) !important;
+  --dsw-alias-markdown-code-segment-unselected: rgba(255, 126, 179, 0.08) !important;
+  --dsw-alias-markdown-inline-code: #ffe9f2 !important;
+  --dsw-alias-markdown-placeholder: #c2a7b5 !important;
+  --dsw-alias-markdown-tag: #ff9ec7 !important;
+
+  --dsw-alias-scrollbar-bg-l1: #ffc9db !important;
+  --dsw-alias-scrollbar-bg-l2: #ffd3e2 !important;
+  --dsw-alias-scrollbar-hover-l1: #ff9ec7 !important;
+  --dsw-alias-scrollbar-hover-l2: #ff8fc0 !important;
+
+  --dsw-alias-toast-bg: #fff5f8 !important;
+  --dsw-alias-tooltip-bg: #fff5f8 !important;
+  --dsw-hovercard-bg: #fff5f8 !important;
+
+  --dsw-specific-sidebar-fill: rgba(255, 239, 246, 0.35) !important;
+  --dsw-specific-sidebar-nav-item-active: #ffdcec !important;
+  --dsw-specific-sidebar-nav-item-hover: #ffe7f1 !important;
+  --dsw-specific-sidebar-nav-item-active-accent: #ff7eb3 !important;
+  --dsw-specific-input-major: rgba(255, 255, 255, 0.62) !important;
+  --dsw-specific-login-input: #ffffff !important;
+  --dsw-specific-menu: rgba(255, 246, 250, 0.94) !important;
+  --dsw-specific-selector: #fff0f6 !important;
+  --dsw-specific-tip: #fff0f6 !important;
+  --dsw-specific-bubble: rgba(255, 247, 250, 0.92) !important;
+  --dsw-specific-bubble-highlight: #ffe3ee !important;
+
+  --dsw-shadow-lv1: 0 1px 4px rgba(255, 126, 179, 0.1) !important;
+  --dsw-shadow-lv1-blur: 0 1px 4px rgba(255, 126, 179, 0.1) !important;
+  --dsw-shadow-lv2: 0 4px 16px rgba(255, 126, 179, 0.12) !important;
+  --dsw-shadow-lv3: 0 8px 28px rgba(255, 126, 179, 0.16) !important;
+  --dsw-linear-gradient-think: linear-gradient(180deg, #ffeaf2, #fff5f9) !important;
+  --dsw-linear-think-select: linear-gradient(180deg, #ffdcec, #ffeaf2) !important;
+
+  --dsh-scrollbar-thumb: #ffc9db !important;
+  --dsh-scrollbar-thumb-hover: #ff8fc0 !important;
+  --dsh-state-ongoing: #ff7eb3 !important;
+
+  /* 玻璃面板（本皮肤私有变量） */
+  --neko-glass-sidebar: rgba(255, 240, 247, 0.5);
+  --neko-glass-main: rgba(255, 244, 250, 0.5);
+  --neko-glass-side: rgba(255, 244, 250, 0.52);
+  --neko-caret: #ff7eb3;
+  --neko-select-bg: #ffb6cd;
+  --neko-select-fg: #5c2438;
+  --neko-aura: rgba(255, 196, 150, 0.32);
+
+  --dsw-web-radius: 14px;
+  --dsl-code-block-border-radius: 14px;
+  --dsl-terminal-radius: 14px;
+  --dsl-diff-radius: 10px;
+  --dsl-read-radius: 10px;
+  --dsl-search-radius: 10px;
+}
+
+/* ============================================================
+   夜间 · 月潮夜晚（深靛紫 + 樱花粉光晕）
+   两个选择器：
+     1) 页面尚无 data-neko（JS 未执行）时，跟随 DSH 深色属性，
+        避免加载瞬间闪白；
+     2) JS 明确标记了夜间模式。
+   ============================================================ */
+html:not([data-neko]) body[data-ds-dark-theme],
+html[data-neko="night"] body {
+  --dsw-alias-brand-primary: #ff8fc0 !important;
+  --dsw-alias-brand-primary-invert: #ffffff !important;
+  --dsw-alias-brand-primary-new-colorprimary-new-color: #ff8fc0 !important;
+  --dsw-alias-brand-text: #ffb3d4 !important;
+
+  --dsw-alias-bg-base: #171226 !important;
+  --dsw-alias-bg-layer-1: #1f1838 !important;
+  --dsw-alias-bg-layer-2: #271e45 !important;
+  --dsw-alias-bg-layer-3: #2f2452 !important;
+  --dsw-alias-bg-mask-1: rgba(20, 12, 40, 0.5) !important;
+  --dsw-alias-bg-mask-2: rgba(20, 12, 40, 0.65) !important;
+  --dsw-alias-bg-mask-3: rgba(20, 12, 40, 0.8) !important;
+  --dsw-alias-bg-mask-drop: rgba(15, 10, 30, 0.88) !important;
+  --dsw-alias-bg-mask-photo: rgba(15, 10, 30, 0.55) !important;
+  --dsw-alias-bg-module-platform: #211a3d !important;
+  --dsw-alias-bg-multi-select: #2a2050 !important;
+  --dsw-alias-bg-overlay: rgba(30, 23, 54, 0.94) !important;
+  --dsw-alias-bg-skeleton: rgba(179, 157, 247, 0.22) !important;
+
+  --dsw-alias-border-l1: rgba(179, 157, 247, 0.16) !important;
+  --dsw-alias-border-l2: rgba(179, 157, 247, 0.26) !important;
+  --dsw-alias-border-l2-darkmode-thin: rgba(179, 157, 247, 0.22) !important;
+  --dsw-alias-border-l3: rgba(179, 157, 247, 0.38) !important;
+  --dsw-alias-border-l4: rgba(179, 157, 247, 0.52) !important;
+  --dsw-alias-border-inverted: #3a2d6b !important;
+  --dsw-alias-border-inverted2: #4c3c8c !important;
+
+  --dsw-alias-label-primary: #f2ecff !important;
+  --dsw-alias-label-primary-bluish: #cdc4f0 !important;
+  --dsw-alias-label-primary-dimmed: #a79aca !important;
+  --dsw-alias-label-primary-foreground: #ffffff !important;
+  --dsw-alias-label-primary-inverted: #241a3e !important;
+  --dsw-alias-label-secondary: #c9bfe8 !important;
+  --dsw-alias-label-tertiary: #9d90c9 !important;
+  --dsw-alias-label-caption: #8d80ba !important;
+  --dsw-alias-label-dimmed: #7e719f !important;
+
+  --dsw-alias-interactive-bg-hover: rgba(179, 157, 247, 0.14) !important;
+  --dsw-alias-interactive-bg-active: rgba(179, 157, 247, 0.24) !important;
+  --dsw-alias-interactive-bg-hover-accent: rgba(255, 143, 192, 0.16) !important;
+  --dsw-alias-interactive-bg-hover-danger: rgba(255, 90, 120, 0.16) !important;
+  --dsw-alias-interactive-bg-hover-solid: rgba(255, 255, 255, 0.08) !important;
+
+  --dsw-alias-button-primary-fill: #ff7eb3 !important;
+  --dsw-alias-button-primary-hover: #ff8fc0 !important;
+  --dsw-alias-button-primary-dimmed: rgba(255, 126, 179, 0.35) !important;
+  --dsw-alias-button-contrast-fill: #f2ecff !important;
+  --dsw-alias-button-elevated-fill: #241b47 !important;
+  --dsw-alias-button-floating-fill: #2b2152 !important;
+  --dsw-alias-button-floating-hover: #342a63 !important;
+  --dsw-alias-button-ghost-active-fill: rgba(179, 157, 247, 0.16) !important;
+  --dsw-alias-button-ghost-active-hover: rgba(179, 157, 247, 0.26) !important;
+  --dsw-alias-button-ghost-active-border: rgba(179, 157, 247, 0.5) !important;
+  --dsw-alias-button-info-fill: #2a2150 !important;
+  --dsw-alias-button-info-hover: #352b63 !important;
+  --dsw-alias-button-tool-bar-fill: transparent !important;
+  --dsw-alias-button-tool-bar-fill-invisible: transparent !important;
+  --dsw-alias-button-tool-bar-hover: rgba(179, 157, 247, 0.16) !important;
+
+  --dsw-alias-state-success-primary: #6fe0b4 !important;
+  --dsw-alias-state-success-secondary: rgba(111, 224, 180, 0.18) !important;
+  --dsw-alias-state-success-tertiary: #173b2e !important;
+  --dsw-alias-state-warn-primary: #f2c36b !important;
+  --dsw-alias-state-warn-label: #f2c36b !important;
+  --dsw-alias-state-warn-secondary: rgba(242, 195, 107, 0.18) !important;
+  --dsw-alias-state-warn-tertiary: #3d3120 !important;
+  --dsw-alias-state-error-primary: #ff8ba7 !important;
+  --dsw-alias-state-error-secondary: rgba(255, 139, 167, 0.18) !important;
+  --dsw-alias-state-business-primary: #b39df7 !important;
+  --dsw-alias-state-business-tertiary: #2a2150 !important;
+
+  --dsw-alias-markdown-citation: #ff9ec7 !important;
+  --dsw-alias-markdown-code-block: rgba(27, 20, 52, 0.92) !important;
+  --dsw-alias-markdown-code-block-banner: #241b45 !important;
+  --dsw-alias-markdown-code-segment-selected: rgba(179, 157, 247, 0.3) !important;
+  --dsw-alias-markdown-code-segment-unselected: rgba(255, 255, 255, 0.06) !important;
+  --dsw-alias-markdown-inline-code: #2b2152 !important;
+  --dsw-alias-markdown-placeholder: #7e719f !important;
+  --dsw-alias-markdown-tag: #ff8fc0 !important;
+
+  --dsw-alias-scrollbar-bg-l1: #4b3d7d !important;
+  --dsw-alias-scrollbar-bg-l2: #3c3068 !important;
+  --dsw-alias-scrollbar-hover-l1: #8b76d9 !important;
+  --dsw-alias-scrollbar-hover-l2: #7f69cc !important;
+
+  --dsw-alias-toast-bg: #241b45 !important;
+  --dsw-alias-tooltip-bg: #2b2152 !important;
+  --dsw-hovercard-bg: #271e45 !important;
+
+  --dsw-specific-sidebar-fill: rgba(23, 18, 42, 0.4) !important;
+  --dsw-specific-sidebar-nav-item-active: rgba(179, 157, 247, 0.2) !important;
+  --dsw-specific-sidebar-nav-item-hover: rgba(179, 157, 247, 0.12) !important;
+  --dsw-specific-sidebar-nav-item-active-accent: #ff8fc0 !important;
+  --dsw-specific-input-major: rgba(30, 22, 58, 0.6) !important;
+  --dsw-specific-login-input: #221a3e !important;
+  --dsw-specific-menu: rgba(36, 27, 69, 0.96) !important;
+  --dsw-specific-selector: #2a2050 !important;
+  --dsw-specific-tip: #241b47 !important;
+  --dsw-specific-bubble: rgba(34, 26, 66, 0.94) !important;
+  --dsw-specific-bubble-highlight: #2e2454 !important;
+
+  --dsw-shadow-lv1: 0 1px 4px rgba(8, 4, 20, 0.35) !important;
+  --dsw-shadow-lv1-blur: 0 1px 4px rgba(8, 4, 20, 0.35) !important;
+  --dsw-shadow-lv2: 0 4px 16px rgba(8, 4, 20, 0.5) !important;
+  --dsw-shadow-lv3: 0 8px 28px rgba(8, 4, 20, 0.65) !important;
+  --dsw-linear-gradient-think: linear-gradient(180deg, #241b45, #1b1434) !important;
+  --dsw-linear-think-select: linear-gradient(180deg, #2e2454, #241b45) !important;
+
+  --dsh-scrollbar-thumb: #4b3d7d !important;
+  --dsh-scrollbar-thumb-hover: #8b76d9 !important;
+  --dsh-state-ongoing: #ff9ec7 !important;
+
+  --neko-glass-sidebar: rgba(22, 16, 44, 0.62);
+  --neko-glass-main: rgba(24, 17, 47, 0.56);
+  --neko-glass-side: rgba(26, 18, 50, 0.6);
+  --neko-caret: #ff9ec7;
+  --neko-select-bg: rgba(179, 157, 247, 0.4);
+  --neko-select-fg: #f2ecff;
+  --neko-aura: rgba(255, 143, 192, 0.35);
+}
+
+/* color-scheme 跟随模式（JS 未执行时由 DSH 内联脚本接管） */
+html[data-neko="day"] { color-scheme: light !important; }
+html[data-neko="night"] { color-scheme: dark !important; }
+
+/* ============================================================
+   背景：双层猫娘插画（昼夜各一层），随模式交叉淡入淡出
+   ============================================================ */
+body {
+  background-color: #fdf3f8;
+  overflow-x: hidden;
+}
+html[data-neko="night"] body {
+  background-color: #171226;
+}
+
+.neko-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-size: cover;
+  background-position: center;
+  background-repeat: no-repeat;
+  will-change: transform, opacity;
+}
+.neko-bg-day {
+  background-image:
+    linear-gradient(rgba(255, 247, 240, 0.04), rgba(255, 232, 222, 0.14)),
+    url("/assets/neko-bg-day.jpg");
+  opacity: 1;
+  transition: opacity 0.9s ease;
+  animation: neko-bg-zoom 70s ease-in-out infinite alternate;
+}
+.neko-bg-night {
+  background-image:
+    linear-gradient(rgba(12, 7, 28, 0.12), rgba(20, 10, 44, 0.2)),
+    url("/assets/neko-bg-night.jpg");
+  opacity: 0;
+  transition: opacity 0.9s ease;
+  animation: neko-bg-zoom 84s ease-in-out infinite alternate;
+}
+html[data-neko="night"] .neko-bg-night { opacity: 1; }
+html[data-neko="night"] .neko-bg-day { opacity: 0; }
+@keyframes neko-bg-zoom {
+  from { transform: scale(1); }
+  to { transform: scale(1.05); }
+}
+
+/* 应用根容器让出背景 */
+#root {
+  position: relative;
+  z-index: 1;
+  background: transparent !important;
+}
+
+/* ============================================================
+   玻璃面板：侧栏 / 对话区 / 详情栏（毛玻璃 + 半透明）
+   类名来自 dsh-client-ui-layout / dsh-client-ui-conversation 插件
+   ============================================================ */
+.pI_x6G_frame {
+  background: transparent !important;
+}
+/* 注意：不要在面板容器上加 backdrop-filter ——
+   它会劫持 fixed 定位的包含块，把设置等全屏弹层困在面板里 */
+.pI_x6G_sidebarCol {
+  background: var(--neko-glass-sidebar) !important;
+}
+.hHd-Xa_root {
+  background: transparent !important;
+}
+.wSkVaW_root {
+  background: var(--neko-glass-main) !important;
+}
+.wSkVaW_scrollBody {
+  background: transparent !important;
+}
+.ydkMvW_root {
+  background: var(--neko-glass-side) !important;
+}
+
+/* ============================================================
+   猫娘花边：窗口上下缘的猫爪印花
+   （白天：粉色猫爪；夜晚：深蓝黑猫爪，data-URI 内联 SVG）
+   ============================================================ */
+.pI_x6G_frame::after,
+.pI_x6G_frame::before {
+  content: "";
+  position: absolute;
+  left: 0;
+  right: 0;
+  height: 16px;
+  z-index: 6;
+  pointer-events: none;
+  background-repeat: repeat-x;
+  background-size: 64px 16px;
+}
+.pI_x6G_frame::after {
+  top: 0;
+  opacity: 0.75;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='16' viewBox='0 0 64 16'%3E%3Cg transform='translate(15 8) rotate(-8)' fill='%23ff8fc0'%3E%3Ccircle cx='-6.5' cy='-5' r='2.1'/%3E%3Ccircle cx='-2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='6.5' cy='-5' r='2.1'/%3E%3Cellipse cx='0' cy='1.5' rx='4.6' ry='3.8'/%3E%3C/g%3E%3Cg transform='translate(47 8) rotate(8)' fill='%23ffb6d0'%3E%3Ccircle cx='-6.5' cy='-5' r='2.1'/%3E%3Ccircle cx='-2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='6.5' cy='-5' r='2.1'/%3E%3Cellipse cx='0' cy='1.5' rx='4.6' ry='3.8'/%3E%3C/g%3E%3C/svg%3E");
+}
+.pI_x6G_frame::before {
+  bottom: 0;
+  transform: scaleY(-1);
+  opacity: 0.6;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='16' viewBox='0 0 64 16'%3E%3Cg transform='translate(15 8) rotate(-8)' fill='%23ff8fc0'%3E%3Ccircle cx='-6.5' cy='-5' r='2.1'/%3E%3Ccircle cx='-2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='6.5' cy='-5' r='2.1'/%3E%3Cellipse cx='0' cy='1.5' rx='4.6' ry='3.8'/%3E%3C/g%3E%3Cg transform='translate(47 8) rotate(8)' fill='%23ffb6d0'%3E%3Ccircle cx='-6.5' cy='-5' r='2.1'/%3E%3Ccircle cx='-2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='6.5' cy='-5' r='2.1'/%3E%3Cellipse cx='0' cy='1.5' rx='4.6' ry='3.8'/%3E%3C/g%3E%3C/svg%3E");
+}
+html[data-neko="night"] .pI_x6G_frame::after {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='16' viewBox='0 0 64 16'%3E%3Cg transform='translate(15 8) rotate(-8)' fill='%232a3466'%3E%3Ccircle cx='-6.5' cy='-5' r='2.1'/%3E%3Ccircle cx='-2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='6.5' cy='-5' r='2.1'/%3E%3Cellipse cx='0' cy='1.5' rx='4.6' ry='3.8'/%3E%3C/g%3E%3Cg transform='translate(47 8) rotate(8)' fill='%233a4578'%3E%3Ccircle cx='-6.5' cy='-5' r='2.1'/%3E%3Ccircle cx='-2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='6.5' cy='-5' r='2.1'/%3E%3Cellipse cx='0' cy='1.5' rx='4.6' ry='3.8'/%3E%3C/g%3E%3C/svg%3E");
+}
+html[data-neko="night"] .pI_x6G_frame::before {
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='64' height='16' viewBox='0 0 64 16'%3E%3Cg transform='translate(15 8) rotate(-8)' fill='%232a3466'%3E%3Ccircle cx='-6.5' cy='-5' r='2.1'/%3E%3Ccircle cx='-2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='6.5' cy='-5' r='2.1'/%3E%3Cellipse cx='0' cy='1.5' rx='4.6' ry='3.8'/%3E%3C/g%3E%3Cg transform='translate(47 8) rotate(8)' fill='%233a4578'%3E%3Ccircle cx='-6.5' cy='-5' r='2.1'/%3E%3Ccircle cx='-2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='2.2' cy='-6.5' r='2.3'/%3E%3Ccircle cx='6.5' cy='-5' r='2.1'/%3E%3Cellipse cx='0' cy='1.5' rx='4.6' ry='3.8'/%3E%3C/g%3E%3C/svg%3E");
+}
+/* 夜间深色爪提高不透明度，保证暗背景上可见 */
+html[data-neko="night"] .pI_x6G_frame::after {
+  opacity: 0.9;
+}
+html[data-neko="night"] .pI_x6G_frame::before {
+  opacity: 0.8;
+}
+
+/* ============================================================
+   动态氛围：白天花瓣/柔光，夜晚星空/月亮/流星
+   元素由 neko-theme.js 注入，这里只做动画
+   ============================================================ */
+.neko-sun {
+  position: fixed;
+  top: -70px;
+  right: -70px;
+  width: 300px;
+  height: 300px;
+  border-radius: 50%;
+  background: radial-gradient(circle, rgba(255, 214, 232, 0.7), rgba(255, 214, 232, 0) 70%);
+  z-index: 0;
+  pointer-events: none;
+}
+.neko-petal {
+  position: fixed;
+  top: -6vh;
+  z-index: 0;
+  pointer-events: none;
+  animation: neko-petal-fall linear infinite;
+  text-shadow: 0 0 6px rgba(255, 150, 195, 0.35);
+}
+@keyframes neko-petal-fall {
+  0% { transform: translate3d(0, -6vh, 0) rotate(0deg); opacity: 0; }
+  8% { opacity: 0.9; }
+  85% { opacity: 0.75; }
+  100% { transform: translate3d(var(--petal-drift, 60px), 110vh, 0) rotate(320deg); opacity: 0; }
+}
+.neko-star {
+  position: fixed;
+  z-index: 0;
+  pointer-events: none;
+  border-radius: 50%;
+  background: radial-gradient(circle, #ffffff 0%, rgba(255, 255, 255, 0) 70%);
+  animation: neko-twinkle var(--tw, 3s) ease-in-out infinite;
+  animation-delay: var(--td, 0s);
+}
+@keyframes neko-twinkle {
+  0%, 100% { opacity: 0.12; }
+  50% { opacity: 0.9; }
+}
+.neko-moon {
+  position: fixed;
+  top: 30px;
+  right: 60px;
+  width: 92px;
+  height: 92px;
+  border-radius: 50%;
+  z-index: 0;
+  pointer-events: none;
+  background: radial-gradient(circle at 38% 36%, #fff8f2, #ffd9ec 55%, #c9a8f5 100%);
+  box-shadow: 0 0 40px 18px rgba(255, 214, 236, 0.22), 0 0 130px 60px rgba(179, 157, 247, 0.16);
+  animation: neko-moon-drift 26s ease-in-out infinite alternate;
+}
+@keyframes neko-moon-drift {
+  from { transform: translate(0, 0); }
+  to { transform: translate(-16px, 12px); }
+}
+.neko-comet {
+  position: fixed;
+  top: 16%;
+  left: -160px;
+  width: 140px;
+  height: 2px;
+  z-index: 0;
+  pointer-events: none;
+  background: linear-gradient(90deg, rgba(255, 255, 255, 0.95), rgba(255, 255, 255, 0));
+  animation: neko-shoot 13s linear infinite 4s;
+}
+@keyframes neko-shoot {
+  0% { transform: translate(0, 0) rotate(18deg); opacity: 0; }
+  3% { opacity: 0.9; }
+  11% { transform: translate(140vw, 88vh) rotate(18deg); opacity: 0; }
+  100% { transform: translate(140vw, 88vh) rotate(18deg); opacity: 0; }
+}
+/* 昼夜元素的显隐 */
+.neko-star, .neko-moon, .neko-comet { display: none; }
+html[data-neko="night"] .neko-star,
+html[data-neko="night"] .neko-moon,
+html[data-neko="night"] .neko-comet { display: block; }
+html[data-neko="night"] .neko-petal,
+html[data-neko="night"] .neko-sun { display: none; }
+
+/* ============================================================
+   Q版猫娘宠物（右下角，点她切换 日→夜→自动）
+   ============================================================ */
+.neko-pet-wrap {
+  position: fixed;
+  right: 14px;
+  bottom: 48px;
+  z-index: 1200;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transform-origin: bottom right;
+  transition: opacity 0.25s ease;
+}
+/* 设置面板等浮层打开时：猫娘缩小到角落，但始终保持显示 */
+.neko-pet-wrap.neko-mini {
+  pointer-events: none;
+}
+.neko-pet-wrap.neko-mini .neko-pet-frame {
+  transform: scale(0.45);
+  transform-origin: bottom right;
+}
+.neko-pet-wrap.neko-mini .neko-pet-bubble,
+.neko-pet-wrap.neko-mini .neko-pet-menu,
+.neko-pet-wrap.neko-mini .neko-mode-chip {
+  opacity: 0 !important;
+  pointer-events: none !important;
+}
+.neko-pet-wrap::after {
+  content: "";
+  position: absolute;
+  bottom: 10px;
+  left: 50%;
+  width: 380px;
+  height: 70px;
+  transform: translateX(-50%);
+  border-radius: 50%;
+  background: radial-gradient(closest-side, var(--neko-aura), transparent);
+  opacity: 0;
+  transition: opacity 0.5s ease;
+  pointer-events: none;
+}
+html[data-neko="night"] .neko-pet-wrap::after { opacity: 1; }
+.neko-pet-holder {
+  animation: neko-bob 3.4s ease-in-out infinite;
+}
+.neko-pet-frame {
+  position: relative;
+  width: 544px;
+  height: 544px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  background: url("/assets/neko-pet-lace-day.svg") center / cover no-repeat;
+  transition: filter 0.5s ease, transform 0.25s ease;
+}
+html[data-neko="night"] .neko-pet-frame {
+  background-image: url("/assets/neko-pet-lace.svg");
+  filter: drop-shadow(0 0 12px rgba(255, 143, 192, 0.35));
+}
+.neko-pet-img {
+  width: 472px;
+  height: 472px;
+  display: block;
+  border-radius: 50%;
+  filter: drop-shadow(0 8px 20px rgba(255, 170, 120, 0.35));
+  transition: transform 0.25s ease, filter 0.5s ease;
+}
+html[data-neko="night"] .neko-pet-img {
+  filter: drop-shadow(0 0 14px rgba(255, 143, 192, 0.45));
+}
+.neko-pet-wrap:hover .neko-pet-img {
+  transform: scale(1.03) rotate(-1.5deg);
+}
+/* 输入时：认真看向对话框（轻微左倾） */
+.neko-pet-img.watching {
+  transform: translateX(-26px) rotate(-2.5deg);
+}
+/* 思考中：歪头思考（可爱地看向上方） */
+.neko-pet-img.thinking {
+  transform: translateX(-12px) rotate(-6deg);
+}
+/* 互动时形象切换的弹出动画 */
+.neko-pet-img.pop {
+  animation: neko-pop 0.5s ease;
+}
+@keyframes neko-pop {
+  0% { transform: scale(1); }
+  35% { transform: scale(1.07) rotate(-2deg); }
+  70% { transform: scale(0.985); }
+  100% { transform: scale(1); }
+}
+/* 悬停互动菜单（投喂/摸头/亲亲/主题） */
+.neko-pet-menu {
+  position: absolute;
+  bottom: calc(100% + 16px);
+  left: 50%;
+  display: flex;
+  flex-wrap: wrap;
+  justify-content: center;
+  gap: 4px 8px;
+  max-width: 520px;
+  padding: 10px 14px;
+  border-radius: 22px;
+  background: var(--dsw-alias-bg-overlay);
+  border: 1px solid var(--dsw-alias-border-l2);
+  box-shadow: var(--dsw-shadow-lv3);
+  opacity: 0;
+  transform: translate(-50%, 10px);
+  pointer-events: none;
+  transition: opacity 0.2s ease, transform 0.2s ease;
+  white-space: nowrap;
+}
+.neko-pet-wrap:hover .neko-pet-menu {
+  opacity: 1;
+  transform: translate(-50%, 0);
+  pointer-events: auto;
+}
+.neko-menu-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 2px;
+  padding: 6px 10px;
+  border: none;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--dsw-alias-label-primary);
+  font: inherit;
+  transition: background 0.15s ease;
+}
+.neko-menu-btn:hover {
+  background: var(--dsw-alias-interactive-bg-hover);
+}
+/* 隐藏成就按钮：默认不显示，达成条件后解锁 */
+.neko-menu-btn.neko-locked {
+  display: none !important;
+}
+.neko-menu-btn span {
+  font-size: 22px;
+  line-height: 1;
+}
+.neko-menu-btn i {
+  font-style: normal;
+  font-size: 11px;
+  line-height: 1.3;
+}
+/* 互动飘出的表情符号 */
+.neko-floaty {
+  position: fixed;
+  z-index: 1240;
+  pointer-events: none;
+  animation: neko-float-up 1.9s ease-out forwards;
+}
+@keyframes neko-float-up {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+  12% { opacity: 1; }
+  100% {
+    opacity: 0;
+    transform: translate(calc(-50% + var(--fx, 0px)), -240px) scale(1.3) rotate(var(--fr, 0deg));
+  }
+}
+/* 亲亲：全屏飘落的粉色半透明告白文字 */
+.neko-rain-text {
+  position: fixed;
+  top: -12vh;
+  z-index: 1240;
+  pointer-events: none;
+  white-space: nowrap;
+  color: #ff9ec7;
+  text-shadow: 0 0 10px rgba(255, 126, 179, 0.55), 0 0 24px rgba(255, 158, 199, 0.3);
+  animation: neko-rain-fall linear forwards;
+  opacity: 0;
+}
+@keyframes neko-rain-fall {
+  0% { transform: translate3d(0, 0, 0) rotate(-5deg); opacity: 0; }
+  8% { opacity: var(--ro, 0.55); }
+  85% { opacity: var(--ro, 0.55); }
+  100% { transform: translate3d(var(--sway, 40px), 125vh, 0) rotate(6deg); opacity: 0; }
+}
+@keyframes neko-bob {
+  0%, 100% { transform: translateY(0); }
+  50% { transform: translateY(-7px); }
+}
+/* 点击飘出的爱心 */
+.neko-heart {
+  position: fixed;
+  z-index: 1240;
+  pointer-events: none;
+  color: #ff6aa7;
+  text-shadow: 0 0 6px rgba(255, 126, 179, 0.6);
+  animation: neko-heart-up 1.7s ease-out forwards;
+}
+@keyframes neko-heart-up {
+  0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
+  12% { opacity: 1; }
+  100% { opacity: 0; transform: translate(-50%, -150px) scale(1.35); }
+}
+/* 梦幻光斑（午后阳光 bokeh，围绕萌妹浮动；夜间化为月尘） */
+.neko-bokeh {
+  position: fixed;
+  z-index: 1190;
+  border-radius: 50%;
+  pointer-events: none;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 238, 208, 0.95), rgba(255, 205, 158, 0.35) 62%, rgba(255, 205, 158, 0) 75%);
+  animation: neko-bokeh-float 6s ease-in-out infinite;
+  filter: blur(0.5px);
+}
+html[data-neko="night"] .neko-bokeh {
+  opacity: 0.45;
+  background: radial-gradient(circle at 35% 35%, rgba(255, 240, 250, 0.9), rgba(200, 170, 240, 0.3) 62%, rgba(200, 170, 240, 0) 75%);
+}
+@keyframes neko-bokeh-float {
+  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.45; }
+  50% { transform: translate(7px, -16px) scale(1.2); opacity: 0.9; }
+}
+.neko-pet-bubble {
+  position: absolute;
+  bottom: 584px;
+  right: -20px;
+  width: max-content;
+  max-width: 190px;
+  padding: 6px 10px;
+  border-radius: 12px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-overlay);
+  color: var(--dsw-alias-label-primary);
+  font-size: 12px;
+  line-height: 1.4;
+  opacity: 0;
+  transform: translateY(6px);
+  transition: opacity 0.25s ease, transform 0.25s ease, bottom 0.2s ease;
+  pointer-events: none;
+  box-shadow: var(--dsw-shadow-lv2);
+}
+/* 悬停打开互动菜单时，气泡上移让位 */
+.neko-pet-wrap:hover .neko-pet-bubble {
+  bottom: 700px;
+}
+.neko-pet-bubble::before {
+  content: "";
+  position: absolute;
+  top: -9px;
+  left: 14px;
+  width: 26px;
+  height: 10px;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 26 10'%3E%3Cpath d='M1 10 L6 1 L11 10 Z' fill='%23ffffff' stroke='%23ffb6d0' stroke-width='1.2'/%3E%3Cpath d='M15 10 L20 1 L25 10 Z' fill='%23ffffff' stroke='%23ffb6d0' stroke-width='1.2'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+.neko-pet-bubble::after {
+  content: "🐾";
+  position: absolute;
+  bottom: -14px;
+  right: 22px;
+  font-size: 14px;
+  line-height: 1;
+}
+.neko-pet-wrap:hover .neko-pet-bubble,
+.neko-pet-bubble.show {
+  opacity: 1;
+  transform: translateY(0);
+}
+.neko-mode-chip {
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  min-width: 18px;
+  text-align: center;
+  padding: 2px 7px;
+  border-radius: 999px;
+  border: 1px solid var(--dsw-alias-border-l2);
+  background: var(--dsw-alias-bg-overlay);
+  color: var(--dsw-alias-label-secondary);
+  font-size: 11px;
+  line-height: 1.5;
+  box-shadow: var(--dsw-shadow-lv1);
+}
+
+/* ============================================================
+   细节：滚动条 / 选中 / 光标 / 焦点
+   ============================================================ */
+::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+::-webkit-scrollbar-thumb {
+  background: var(--dsh-scrollbar-thumb, #ffc9db);
+  border-radius: 8px;
+  border: 2px solid transparent;
+  background-clip: content-box;
+}
+::-webkit-scrollbar-thumb:hover {
+  background: var(--dsh-scrollbar-thumb-hover, #ff8fc0);
+  background-clip: content-box;
+}
+::-webkit-scrollbar-track {
+  background: transparent;
+}
+::selection {
+  background: var(--neko-select-bg, #ffb6cd);
+  color: var(--neko-select-fg, #5c2438);
+}
+input, textarea, [contenteditable] {
+  caret-color: var(--neko-caret, #ff7eb3);
+}
+*:focus-visible {
+  outline-color: var(--neko-caret, #ff7eb3);
+}
+
+/* ============================================================
+   猫娘女仆元素：猫爪光标 / 侧栏女仆帽徽章
+   ============================================================ */
+/* 猫爪光标（默认） */
+body {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cg fill='%23ff7eb3' stroke='%23ffffff' stroke-width='1'%3E%3Cellipse cx='12' cy='15.5' rx='5.2' ry='4.6'/%3E%3Ccircle cx='4.8' cy='6.8' r='2.7'/%3E%3Ccircle cx='9.6' cy='4.2' r='2.9'/%3E%3Ccircle cx='14.4' cy='4.2' r='2.9'/%3E%3Ccircle cx='19.2' cy='6.8' r='2.7'/%3E%3C/g%3E%3C/svg%3E") 12 12, auto !important;
+}
+/* 猫爪光标（可点击，带光环） */
+a, button, [role="button"], label, summary,
+.neko-pet-wrap, .pI_x6G_handle {
+  cursor: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Ccircle cx='12' cy='12' r='11' fill='none' stroke='%23ff9ec7' stroke-width='1.6' opacity='.75'/%3E%3Cg fill='%23ff7eb3' stroke='%23ffffff' stroke-width='1'%3E%3Cellipse cx='12' cy='15.5' rx='5.2' ry='4.6'/%3E%3Ccircle cx='4.8' cy='6.8' r='2.7'/%3E%3Ccircle cx='9.6' cy='4.2' r='2.9'/%3E%3Ccircle cx='14.4' cy='4.2' r='2.9'/%3E%3Ccircle cx='19.2' cy='6.8' r='2.7'/%3E%3C/g%3E%3C/svg%3E") 12 12, pointer !important;
+}
+/* 文本编辑区保留文字光标 */
+input, textarea, select,
+[contenteditable], [contenteditable="true"], [contenteditable=""] {
+  cursor: text !important;
+}
+/* 侧栏品牌行右侧：女仆头饰徽章 */
+.hHd-Xa_logoRow::after {
+  content: "";
+  width: 24px;
+  height: 24px;
+  margin-left: auto;
+  margin-right: 2px;
+  flex: 0 0 auto;
+  opacity: 0.95;
+  pointer-events: none;
+  background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Cpath d='M4 12 C4 6.5 8 5 12 5 C16 5 20 6.5 20 12 L17.6 12 C17.6 8.8 15 7.7 12 7.7 C9 7.7 6.4 8.8 6.4 12 Z' fill='%23ffffff' stroke='%23ffb6d0' stroke-width='1.1'/%3E%3Ccircle cx='8.4' cy='12.4' r='1.7' fill='%23ffffff' stroke='%23ffb6d0' stroke-width='.8'/%3E%3Ccircle cx='12' cy='12.9' r='1.7' fill='%23ffffff' stroke='%23ffb6d0' stroke-width='.8'/%3E%3Ccircle cx='15.6' cy='12.4' r='1.7' fill='%23ffffff' stroke='%23ffb6d0' stroke-width='.8'/%3E%3Ccircle cx='17' cy='8.6' r='2.5' fill='%23ff9ec7'/%3E%3Ccircle cx='20.4' cy='8.2' r='2.5' fill='%23ff9ec7'/%3E%3Ccircle cx='18.7' cy='8.9' r='1.5' fill='%23ff6aa7'/%3E%3C/svg%3E") center / contain no-repeat;
+}
+/* 夜间：女仆帽微微发光 */
+html[data-neko="night"] .hHd-Xa_logoRow::after {
+  filter: drop-shadow(0 0 6px rgba(255, 143, 192, 0.5));
+}
+
+/* 窗口自适应：小窗/矮窗时整体缩小，不遮挡对话框 */
+@media (max-width: 1500px) { .neko-pet-wrap { transform: scale(0.82); } }
+@media (max-width: 1240px) { .neko-pet-wrap { transform: scale(0.66); } }
+@media (max-width: 1000px) { .neko-pet-wrap { transform: scale(0.52); } }
+@media (max-height: 860px) { .neko-pet-wrap { transform: scale(0.75); } }
+@media (max-height: 700px) { .neko-pet-wrap { transform: scale(0.58); } }
+
+/* 动画偏好：跟随系统“减少动态效果” */
+@media (prefers-reduced-motion: reduce) {
+  .neko-petal, .neko-star, .neko-moon, .neko-comet,
+  .neko-bg-day, .neko-bg-night, .neko-pet-holder,
+  .neko-heart, .neko-bokeh, .neko-floaty, .neko-pet-img.pop {
+    animation: none !important;
+  }
+  .neko-rain-text {
+    display: none !important;
+  }
+}
