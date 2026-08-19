@@ -47,6 +47,17 @@ foreach ($root in $Candidates) {
   # ---- copy skin assets (flat into dist/assets) ----
   Copy-Item (Join-Path $AssetsDir '*') $assetsOut -Force
 
+  # ---- generate local DeepSeek API key file (this machine only, never in the repo) ----
+  $cred = Join-Path $env:USERPROFILE '.dsh\.credentials.yaml'
+  if (Test-Path $cred) {
+    $cm = [regex]::Match((Get-Content $cred -Raw), 'DEEPSEEK_API_KEY:\s*(\S+)')
+    if ($cm.Success) {
+      $keyJs = 'window.__NEKO_DS_KEY__ = "' + $cm.Groups[1].Value + '";'
+      [System.IO.File]::WriteAllText((Join-Path $assetsOut 'neko-ds-key.js'), $keyJs, (New-Object System.Text.UTF8Encoding($false)))
+      Write-Host "[OK] local API key file generated"
+    }
+  }
+
   # ---- patch index.html ----
   $html = [System.IO.File]::ReadAllText($idxFile)
   $m = [regex]::Match($html, 'override\.css\?v=(\d+)')
@@ -58,6 +69,9 @@ foreach ($root in $Candidates) {
   }
   if ($html -notmatch 'neko-theme\.js') {
     $html = $html.Replace('</body>', '<script src="/assets/neko-theme.js" defer></script></body>')
+  }
+  if ($html -notmatch 'neko-ds-key\.js') {
+    $html = $html.Replace('<script src="/assets/neko-theme.js" defer>', '<script src="/assets/neko-ds-key.js"></script><script src="/assets/neko-theme.js" defer>')
   }
   [System.IO.File]::WriteAllText($idxFile, $html, (New-Object System.Text.UTF8Encoding($false)))
 
