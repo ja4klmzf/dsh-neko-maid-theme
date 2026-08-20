@@ -43,11 +43,13 @@
 
 ![夜间主题](docs/screenshot-night.png)
 
-**🐱 猫娘特写**
+**🐱 猫娘特写 · 日间（完整立绘 + 互动菜单 + 台词气泡）**
 
-| 日间 | 夜间 |
-|---|---|
-| ![猫娘特写·日间](docs/neko-pet-closeup.png) | ![猫娘特写·夜间](docs/neko-pet-closeup-night.png) |
+<p align="center"><img src="docs/neko-pet-closeup.png" width="640" alt="猫娘特写·日间"></p>
+
+**🌙 猫娘特写 · 夜间**
+
+<p align="center"><img src="docs/neko-pet-closeup-night.png" width="640" alt="猫娘特写·夜间"></p>
 
 ---
 
