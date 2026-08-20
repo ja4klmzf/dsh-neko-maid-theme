@@ -1,5 +1,5 @@
 /* ============================================================
-   猫娘女仆主题 v1.1.0 · Neko Maid Theme for DeepSeek Harness Web GUI
+   猫娘女仆主题 v1.1.1 · Neko Maid Theme for DeepSeek Harness Web GUI
    ------------------------------------------------------------
    更新日志：https://github.com/ja4klmzf/dsh-neko-maid-theme/blob/main/CHANGELOG.md
    职责：
@@ -32,6 +32,17 @@
   }
 
   var mode = readMode();
+
+  /* 截图模式：URL 参数 ?neko-day=1 / ?neko-night=1 / ?neko-menu=1 / ?neko-hide-balance=1 */
+  try {
+    var qp = new URLSearchParams(location.search);
+    if (qp.get('neko-day') === '1') { mode = 'day'; }
+    else if (qp.get('neko-night') === '1') { mode = 'night'; }
+    window.__nekoShot = {
+      menu: qp.get('neko-menu') === '1',
+      hideBalance: qp.get('neko-hide-balance') === '1'
+    };
+  } catch (e) { /* ignore */ }
   var petWrap = null;
   var chipEl = null;
   var bubbleEl = null;
@@ -1945,6 +1956,42 @@
         return;
       }
     }
+    /* 1.5) 等待任务栏（“下一个任务等待执行”）可见时：把余额框顶到它上方，避免遮挡 */
+    var dockEl = null;
+    var dockCands = document.querySelectorAll('._7yHdaG_dock, ._7yHdaG_panel');
+    for (var di = 0; di < dockCands.length && !dockEl; di++) {
+      var dc = dockCands[di];
+      var dcs = window.getComputedStyle(dc);
+      var dr = dc.getBoundingClientRect();
+      if (dcs.visibility !== 'hidden' && dcs.display !== 'none' && dr.height > 0 && dr.width > 100 && dr.width < 1200) dockEl = dc;
+    }
+    if (!dockEl) {
+      /* 文本兜底：类名是构建哈希，版本升级可能变 */
+      var tnNodes = document.querySelectorAll('span, li, div');
+      for (var tn = 0; tn < tnNodes.length && !dockEl; tn++) {
+        var tnode = tnNodes[tn];
+        var own = Array.prototype.filter.call(tnode.childNodes, function (n) { return n.nodeType === 3; })
+          .map(function (n) { return n.textContent; }).join('');
+        if (own.indexOf('等待执行') >= 0) {
+          var anc = tnode;
+          for (var up = 0; up < 6 && anc; up++) {
+            var acs = window.getComputedStyle(anc);
+            var ar = anc.getBoundingClientRect();
+            if (acs.display !== 'none' && acs.visibility !== 'hidden' && ar.width > 100 && ar.width < 1200 && ar.height > 0) {
+              dockEl = anc;
+              break;
+            }
+            anc = anc.parentElement;
+          }
+        }
+      }
+    }
+    if (dockEl) {
+      var dr2 = dockEl.getBoundingClientRect();
+      balanceBoxEl.style.bottom = Math.max(16, window.innerHeight - dr2.top + 16) + 'px';
+      balanceBoxEl.style.right = Math.max(6, window.innerWidth - dr2.right + 6) + 'px';
+      return;
+    }
     /* 2) 默认：贴对话框上沿右侧 */
     var sel = ['.uV2eYG_card', '.uV2eYG_root', '.wSkVaW_composerSeat'];
     var el = null;
@@ -2193,6 +2240,15 @@
     positionBalance();
     setTimeout(refreshBalance, 4000);
     setInterval(refreshBalance, 30 * 60 * 1000);
+    /* 截图模式处理 */
+    if (window.__nekoShot) {
+      if (window.__nekoShot.menu && petWrap) {
+        petWrap.classList.add('neko-menu-open');
+      }
+      if (window.__nekoShot.hideBalance && balanceBoxEl) {
+        balanceBoxEl.style.display = 'none';
+      }
+    }
     /* 工作时长统计：每 30 秒结算一次 */
     setInterval(workTick, 30000);
 
