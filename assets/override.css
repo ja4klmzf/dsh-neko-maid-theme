@@ -544,10 +544,61 @@ html[data-neko="night"] .neko-sun { display: none; }
   opacity: 0 !important;
   pointer-events: none !important;
 }
-/* DeepSeek API 余额显示框（对话框上方右侧） */
-.neko-balance {
+/* DeepSeek HUD：峰谷价格 + 余额并排（对话框上方右侧） */
+.neko-hud {
   position: fixed;
   z-index: 900;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+.neko-price {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 6px 12px;
+  border-radius: 999px;
+  background: var(--dsw-alias-bg-overlay);
+  border: 1px solid var(--dsw-alias-border-l2);
+  box-shadow: var(--dsw-shadow-lv2);
+  font-size: 12px;
+  line-height: 1.5;
+  cursor: default;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 0.15s ease;
+}
+.neko-price::before {
+  content: "";
+  width: 7px;
+  height: 7px;
+  border-radius: 50%;
+  background: currentColor;
+  box-shadow: 0 0 6px currentColor;
+  flex: none;
+}
+.neko-price-icon {
+  font-size: 12px;
+  line-height: 1;
+}
+.neko-price-state {
+  font-weight: 600;
+}
+.neko-price-detail {
+  color: var(--dsw-alias-label-secondary);
+}
+.neko-price.peak {
+  color: #e8930c;
+  border-color: rgba(232, 147, 12, 0.5);
+}
+.neko-price.valley {
+  color: #5f7cf8;
+  border-color: rgba(95, 124, 248, 0.5);
+}
+/* DeepSeek API 余额显示框（HUD 右半） */
+.neko-balance {
+  position: relative;
+  z-index: auto;
   display: flex;
   align-items: center;
   gap: 8px;
