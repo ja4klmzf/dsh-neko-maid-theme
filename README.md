@@ -2,7 +2,7 @@
 
 给 DeepSeek Harness Web GUI 换上一套「洛丽塔猫娘女仆」皮肤：昼夜双主题、右下角会叫"欧尼酱"的互动猫娘桌宠、猫爪光标、全屏告白文字雨……个人学习交流用，非商业。
 
-> **当前版本 v1.1.1** · 更新日志见 [CHANGELOG.md](CHANGELOG.md)
+> **当前版本 v1.1.2** · 更新日志见 [CHANGELOG.md](CHANGELOG.md)
 >
 > 灵感来自 [deep-whale-day-night-theme](https://github.com/GGBond2424648901/deep-whale-day-night-theme) 的昼夜主题设计思路，以及 B 站 / [深海女仆工坊 maid-atelier](https://github.com/Small-tailqwq/dsh-deep-whale) 的女仆换肤生态，素材与桌宠形象为本人用 ComfyUI（Qwen-Image）生成的原创猫娘。
 
@@ -17,6 +17,7 @@
 - 🐾 猫爪光标、侧栏女仆头饰徽章、花瓣/星空/月光/流星动态氛围
 - 窗口自适应：小窗自动缩小、猫娘底边始终高于输入框、设置面板打开时缩到角落
 - 💰 **DeepSeek API 余额显示框**（对话框上方右侧，随轨迹面板同步浮动，等待任务栏出现时自动上移避让）
+- ⚡ **峰谷价格框**（余额框左侧）：实时显示当前峰时/谷时与 V4 输入/输出单价（元/百万 tokens），悬停可看缓存命中价与转峰/转谷倒计时
 
 **桌宠（右下角洛丽塔猫娘）**
 - 悬停弹出互动菜单（在立绘下方，移开延时消失）：🐟投喂 / 🖐摸头 / 😺挠下巴 / 🐈摸尾巴 / ⭐夸奖 / 💤休息 / 🍵喝茶 / ☀🌙✦主题
