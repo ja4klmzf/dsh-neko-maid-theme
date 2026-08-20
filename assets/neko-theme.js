@@ -1,5 +1,5 @@
 /* ============================================================
-   猫娘女仆主题 v1.1.1 · Neko Maid Theme for DeepSeek Harness Web GUI
+   猫娘女仆主题 v1.1.2 · Neko Maid Theme for DeepSeek Harness Web GUI
    ------------------------------------------------------------
    更新日志：https://github.com/ja4klmzf/dsh-neko-maid-theme/blob/main/CHANGELOG.md
    职责：
@@ -1861,6 +1861,7 @@
   function layoutTick() {
     positionPet();
     positionBalance();
+    refreshPrice();
   }
 
   function bindPositionWatcher() {
@@ -1901,6 +1902,8 @@
   }
 
   /* ---- DeepSeek API 余额显示框（对话框上方右侧） ---- */
+  var hudEl = null;
+  var priceBoxEl = null;
   var balanceBoxEl = null;
   var balanceValueEl = null;
   var balanceKey = null;
@@ -1924,7 +1927,66 @@
     refreshBalance();
   }
 
-  function buildBalanceBox() {
+  /* ---- 峰谷价格框（DeepSeek V4 分时计价，2026-08-17 起） ---- */
+  var PRICE = {
+    peak:   { label: '峰时', icon: '☀', input: '¥9',   output: '¥27',   hit: '¥0.30' },
+    valley: { label: '谷时', icon: '🌙', input: '¥4.5', output: '¥13.5', hit: '¥0.15' }
+  };
+
+  function priceState() {
+    /* 高峰：北京时间 9:00-12:00 / 14:00-18:00；其余时间为谷时（半价） */
+    var d = new Date();
+    var h = d.getHours() + d.getMinutes() / 60;
+    var peak = (h >= 9 && h < 12) || (h >= 14 && h < 18);
+    var next = new Date(d.getTime());
+    if (peak) {
+      next.setHours(h < 12 ? 12 : 18, 0, 0, 0);
+    } else if (h >= 12 && h < 14) {
+      next.setHours(14, 0, 0, 0);
+    } else if (h >= 18) {
+      next.setDate(next.getDate() + 1);
+      next.setHours(9, 0, 0, 0);
+    } else {
+      next.setHours(9, 0, 0, 0);
+    }
+    return { peak: peak, next: next };
+  }
+
+  function refreshPrice() {
+    if (!priceBoxEl) return;
+    var st = priceState();
+    var p = st.peak ? PRICE.peak : PRICE.valley;
+    priceBoxEl.innerHTML =
+      '<span class="neko-price-icon">' + p.icon + '</span>' +
+      '<span class="neko-price-state">' + p.label + '</span>' +
+      '<span class="neko-price-detail">输入 ' + p.input + '/M · 输出 ' + p.output + '/M</span>';
+    priceBoxEl.classList.toggle('peak', st.peak);
+    priceBoxEl.classList.toggle('valley', !st.peak);
+    var m = Math.max(0, Math.round((st.next.getTime() - Date.now()) / 60000));
+    priceBoxEl.title = 'DeepSeek V4 Pro · 单位：元 / 百万 tokens'
+      + '\n峰时（9:00-12:00 / 14:00-18:00）：输入 ¥9 · 输出 ¥27 · 缓存命中 ¥0.30'
+      + '\n谷时（其余时间）：输入 ¥4.5 · 输出 ¥13.5 · 缓存命中 ¥0.15'
+      + '\n距' + (st.peak ? '转谷' : '转峰') + '还有 ' + Math.floor(m / 60) + ' 时 ' + (m % 60) + ' 分';
+  }
+
+  function buildPriceBox(parent) {
+    var el = document.createElement('div');
+    el.className = 'neko-price valley';
+    (parent || document.body).appendChild(el);
+    priceBoxEl = el;
+    refreshPrice();
+  }
+
+  function buildHud() {
+    var hud = document.createElement('div');
+    hud.className = 'neko-hud';
+    document.body.appendChild(hud);
+    hudEl = hud;
+    buildPriceBox(hud);
+    buildBalanceBox(hud);
+  }
+
+  function buildBalanceBox(parent) {
     var el = document.createElement('div');
     el.className = 'neko-balance';
     el.innerHTML = '<span class="neko-balance-label">🐋 DeepSeek 余额</span><span class="neko-balance-value">--</span>';
@@ -1938,21 +2000,21 @@
         refreshBalance();
       }
     });
-    document.body.appendChild(el);
+    (parent || document.body).appendChild(el);
     balanceBoxEl = el;
     balanceValueEl = el.querySelector('.neko-balance-value');
   }
 
   function positionBalance() {
-    if (!balanceBoxEl) return;
+    if (!hudEl) return;
     /* 1) deep diving（轨迹面板）可见时：锚定面板下缘同步浮动 */
     var ledger = document.querySelector('.qBU-ya_ledger');
     if (ledger) {
       var lcs = window.getComputedStyle(ledger);
       var lr = ledger.getBoundingClientRect();
       if (lcs.visibility !== 'hidden' && lcs.display !== 'none' && lr.height > 0 && lr.width > 0) {
-        balanceBoxEl.style.bottom = Math.max(8, window.innerHeight - lr.bottom + 8) + 'px';
-        balanceBoxEl.style.right = Math.max(6, window.innerWidth - lr.right + 6) + 'px';
+        hudEl.style.bottom = Math.max(8, window.innerHeight - lr.bottom + 8) + 'px';
+        hudEl.style.right = Math.max(6, window.innerWidth - lr.right + 6) + 'px';
         return;
       }
     }
@@ -1972,7 +2034,7 @@
         var tnode = tnNodes[tn];
         var own = Array.prototype.filter.call(tnode.childNodes, function (n) { return n.nodeType === 3; })
           .map(function (n) { return n.textContent; }).join('');
-        if (own.indexOf('等待执行') >= 0) {
+        if (own.indexOf('等待执行') >= 0 && tnode.closest && tnode.closest('.wSkVaW_composerSeat')) {
           var anc = tnode;
           for (var up = 0; up < 6 && anc; up++) {
             var acs = window.getComputedStyle(anc);
@@ -1988,8 +2050,8 @@
     }
     if (dockEl) {
       var dr2 = dockEl.getBoundingClientRect();
-      balanceBoxEl.style.bottom = Math.max(16, window.innerHeight - dr2.top + 16) + 'px';
-      balanceBoxEl.style.right = Math.max(6, window.innerWidth - dr2.right + 6) + 'px';
+      hudEl.style.bottom = Math.max(16, window.innerHeight - dr2.top + 16) + 'px';
+      hudEl.style.right = Math.max(6, window.innerWidth - dr2.right + 6) + 'px';
       return;
     }
     /* 2) 默认：贴对话框上沿右侧 */
@@ -2010,11 +2072,11 @@
       var rect2 = el.getBoundingClientRect();
       var newBottom = Math.max(16, window.innerHeight - rect2.top + 16);
       var rightOff = Math.max(6, window.innerWidth - rect2.right + 6);
-      balanceBoxEl.style.bottom = newBottom + 'px';
-      balanceBoxEl.style.right = rightOff + 'px';
+      hudEl.style.bottom = newBottom + 'px';
+      hudEl.style.right = rightOff + 'px';
     } else {
-      balanceBoxEl.style.bottom = '56px';
-      balanceBoxEl.style.right = '14px';
+      hudEl.style.bottom = '56px';
+      hudEl.style.right = '14px';
     }
   }
 
@@ -2236,7 +2298,7 @@
       positionBalance();
     });
     /* DeepSeek 余额框：跟随布局 + 每 30 分钟刷新 */
-    buildBalanceBox();
+    buildHud();
     positionBalance();
     setTimeout(refreshBalance, 4000);
     setInterval(refreshBalance, 30 * 60 * 1000);
@@ -2245,8 +2307,8 @@
       if (window.__nekoShot.menu && petWrap) {
         petWrap.classList.add('neko-menu-open');
       }
-      if (window.__nekoShot.hideBalance && balanceBoxEl) {
-        balanceBoxEl.style.display = 'none';
+      if (window.__nekoShot.hideBalance && hudEl) {
+        hudEl.style.display = 'none';
       }
     }
     /* 工作时长统计：每 30 秒结算一次 */
