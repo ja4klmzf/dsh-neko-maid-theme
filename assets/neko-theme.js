@@ -1,5 +1,5 @@
 /* ============================================================
-   猫娘女仆主题 v1.1.3 · Neko Maid Theme for DeepSeek Harness Web GUI
+   猫娘女仆主题 v1.1.4 · Neko Maid Theme for DeepSeek Harness Web GUI
    ------------------------------------------------------------
    更新日志：https://github.com/ja4klmzf/dsh-neko-maid-theme/blob/main/CHANGELOG.md
    职责：
@@ -1192,21 +1192,70 @@
     }, 2500);
   }
 
+  /* 农历节日公历对照表（2026-2040）：
+     cny=春节(正月初一) dw=端午(五月初五) zq=中秋(八月十五)；元宵 = 春节 + 14 天 */
+  var LUNAR = {
+    2026: { cny: '2-17', dw: '6-19', zq: '9-25' },
+    2027: { cny: '2-6',  dw: '6-9',  zq: '9-15' },
+    2028: { cny: '1-26', dw: '5-28', zq: '10-3' },
+    2029: { cny: '2-13', dw: '6-16', zq: '9-22' },
+    2030: { cny: '2-3',  dw: '6-5',  zq: '9-12' },
+    2031: { cny: '1-23', dw: '6-25', zq: '10-1' },
+    2032: { cny: '2-11', dw: '6-12', zq: '9-19' },
+    2033: { cny: '1-31', dw: '6-1',  zq: '9-8' },
+    2034: { cny: '2-19', dw: '6-20', zq: '9-27' },
+    2035: { cny: '2-8',  dw: '6-10', zq: '9-16' },
+    2036: { cny: '1-28', dw: '5-30', zq: '10-4' },
+    2037: { cny: '2-15', dw: '6-18', zq: '9-24' },
+    2038: { cny: '2-4',  dw: '6-7',  zq: '9-13' },
+    2039: { cny: '1-24', dw: '5-27', zq: '10-2' },
+    2040: { cny: '2-12', dw: '6-14', zq: '9-21' }
+  };
+
+  function mdOf(d) {
+    return (d.getMonth() + 1) + '-' + d.getDate();
+  }
+
+  /* 农历日期换算：MM-DD 加 n 天（用于元宵 = 春节 + 14） */
+  function mdAddDays(md, n, year) {
+    var p = md.split('-');
+    var d = new Date(year, parseInt(p[0], 10) - 1, parseInt(p[1], 10) + n);
+    return mdOf(d);
+  }
+
+  /* 计算某节日在指定日期下的 md（lunar 节日查表；表外年份返回 null） */
+  function festivalMd(f, d) {
+    if (!f.lunar) return f.md;
+    var rec = LUNAR[d.getFullYear()];
+    if (!rec) return null;
+    if (f.lunar === 'yx') return mdAddDays(rec.cny, 14, d.getFullYear());
+    return rec[f.lunar];
+  }
+
   var FESTIVALS = [
     { md: '1-1', emojis: ['🧧', '🎆', '🎇', '🏮'], lines: ['欧尼酱，新年快乐！新的一年也要一起加油喵~', '新年好呀欧尼酱，咱会一直陪着你的喵~'] },
+    { lunar: 'cny', emojis: ['🧧', '🎆', '🏮', '🐉'], lines: ['欧尼酱，春节快乐！新的一年咱也要一直陪着你喵~', '过年啦！给欧尼酱拜年~ 红包可以给，但不可以趁机摸咱的耳朵喵！'] },
+    { lunar: 'yx', emojis: ['🏮', '🥟', '🍡', '🎐'], lines: ['元宵节快乐！咱给欧尼酱煮了汤圆，甜甜的喵~', '正月十五闹元宵，欧尼酱陪咱看花灯嘛？喵~'] },
     { md: '2-14', emojis: ['💝', '💘', '🍫', '💌'], lines: ['欧尼酱，情人节快乐...这、这是咱的巧克力（小声）', '欧尼酱，今天也要和咱甜甜蜜蜜的喵~'] },
+    { md: '6-1', emojis: ['🍭', '🧸', '🎈', '🍬'], lines: ['今天是儿童节！欧尼酱带咱去游乐园嘛？喵~', '六一快乐！咱永远是欧尼酱的小朋友，要宠着咱喵~'] },
+    { lunar: 'dw', emojis: ['🐲', '🥁', '🍙', '🌿'], lines: ['端午节快乐！记得吃粽子喵，咱...咱吃小鱼干就好啦~', '端午安康！欧尼酱要挂香包，驱走坏运气喵~'] },
     { md: '7-7', emojis: ['💕', '⭐', '🎋', '💫'], lines: ['欧尼酱，七夕快乐~ 咱的愿望就是永远陪着你喵', '七夕的星星好漂亮，和欧尼酱一起看喵~'] },
+    { lunar: 'zq', emojis: ['🌕', '🥮', '🐇', '✨'], lines: ['中秋节快乐！和欧尼酱一起看月亮吃月饼喵~', '今晚的月亮好圆，像咱喜欢欧尼酱的心一样满喵~'] },
+    { md: '10-1', emojis: ['🇨🇳', '🎉', '🎊', '✨'], lines: ['国庆快乐！放假要和欧尼酱一起出去玩喵~', '祖国生日快乐！欧尼酱也要开心喵~'] },
+    { md: '10-31', emojis: ['🎃', '👻', '🍬', '🕸'], lines: ['万圣节快乐！不给糖就捣蛋，欧尼酱快交出小鱼干喵~', '咱扮成小幽灵啦，欧尼酱会被咱吓到吗？喵~'] },
+    { md: '12-24', emojis: ['🎄', '🔔', '🍎', '🎀'], lines: ['平安夜快乐！咱给欧尼酱准备了苹果，要平平安安喵~', '平安夜欧尼酱早点睡，圣诞老公公会送礼物喵~'] },
     { md: '12-25', emojis: ['🎄', '🎁', '🔔', '🎅'], lines: ['欧尼酱，圣诞快乐！今晚咱来当你的圣诞小猫娘喵~', 'Merry Christmas~ 咱的陪伴就是给欧尼酱的礼物喵！'] }
   ];
 
   function checkFestival() {
     var d = new Date();
-    var md = (d.getMonth() + 1) + '-' + d.getDate();
+    var md = mdOf(d);
     for (var i = 0; i < FESTIVALS.length; i++) {
       var f = FESTIVALS[i];
-      if (f.md !== md) continue;
+      var target = festivalMd(f, d);
+      if (!target || target !== md) continue;
+      var doneKey = 'neko-fest-' + (f.lunar || f.md) + '-' + d.getFullYear();
       try {
-        var doneKey = 'neko-fest-' + f.md + '-' + d.getFullYear();
         if (localStorage.getItem(doneKey) === '1') return;
         localStorage.setItem(doneKey, '1');
       } catch (e) { /* ignore */ }
@@ -2552,6 +2601,8 @@
     speakLine: speakLine,
     primeAudio: primeAudio,
     getGAudio: getGAudio,
+    festivalMd: festivalMd,
+    lunar: LUNAR,
     voices: function () {
       try {
         var vs = window.speechSynthesis ? window.speechSynthesis.getVoices() : [];
