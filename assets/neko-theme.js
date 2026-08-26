@@ -1,5 +1,5 @@
 /* ============================================================
-   猫娘女仆主题 v1.1.2 · Neko Maid Theme for DeepSeek Harness Web GUI
+   猫娘女仆主题 v1.1.3 · Neko Maid Theme for DeepSeek Harness Web GUI
    ------------------------------------------------------------
    更新日志：https://github.com/ja4klmzf/dsh-neko-maid-theme/blob/main/CHANGELOG.md
    职责：
@@ -15,6 +15,11 @@
      6. 输入时切“认真看向对话框”；think 时切思考表情；
         每次回答结束开心庆祝
      7. 气泡常驻：说下一句才替换上一句
+      8. 右上 HUD：峰谷价格框 + DeepSeek 余额框，随布局平滑浮动，
+         避让等待任务栏 / 审批面板 / 原生“回到底部”按钮
+      9. 右侧本会话提问导航（复刻 chat.deepseek.com scroll-nav）：
+         悬停展开、移开自动回收、点击跳转、滚动高亮
+     10. DSH 原生「回到底部」按钮皮肤化（样式在 override.css）
    部署：dist/assets/neko-theme.js，index.html 中 <script defer> 引入
    ============================================================ */
 (function () {
@@ -1714,7 +1719,8 @@
     }
     petWrap.style.left = 'auto';
     petWrap.style.top = 'auto';
-    petWrap.style.right = '14px';
+    /* 右侧留出会话导航（scroll-nav）的空间，默认右距 56px */
+    petWrap.style.right = '56px';
     if (el) {
       var top = el.getBoundingClientRect().top;
       var newBottom = Math.max(16, window.innerHeight - top + 14);
@@ -1862,6 +1868,7 @@
     positionPet();
     positionBalance();
     refreshPrice();
+    refreshActiveQuestion();
   }
 
   function bindPositionWatcher() {
@@ -1907,6 +1914,8 @@
   var balanceBoxEl = null;
   var balanceValueEl = null;
   var balanceKey = null;
+  var hudRightPad = null; /* 缓存：输入框右缘到 HUD 右缘的偏移（避让原生“回到底部”按钮） */
+  var lastRightOff = null; /* 缓存：最近一次正常态下的 right 偏移（审批/异常态保持横向位置不漂移） */
 
   function getBalanceKey() {
     if (balanceKey) return balanceKey;
@@ -2018,43 +2027,42 @@
         return;
       }
     }
-    /* 1.5) 等待任务栏（“下一个任务等待执行”）可见时：把余额框顶到它上方，避免遮挡 */
-    var dockEl = null;
-    var dockCands = document.querySelectorAll('._7yHdaG_dock, ._7yHdaG_panel');
-    for (var di = 0; di < dockCands.length && !dockEl; di++) {
-      var dc = dockCands[di];
-      var dcs = window.getComputedStyle(dc);
-      var dr = dc.getBoundingClientRect();
-      if (dcs.visibility !== 'hidden' && dcs.display !== 'none' && dr.height > 0 && dr.width > 100 && dr.width < 1200) dockEl = dc;
-    }
-    if (!dockEl) {
-      /* 文本兜底：类名是构建哈希，版本升级可能变 */
-      var tnNodes = document.querySelectorAll('span, li, div');
-      for (var tn = 0; tn < tnNodes.length && !dockEl; tn++) {
-        var tnode = tnNodes[tn];
-        var own = Array.prototype.filter.call(tnode.childNodes, function (n) { return n.nodeType === 3; })
+    /* 1.4) 等待审批面板（bqrRRG_root 接管输入区）可见时：锚定面板上沿，避免 HUD 掉到角落漂移 */
+    var appr = document.querySelector('.bqrRRG_root');
+    if (!appr) {
+      /* 文本兜底：类名是构建哈希，版本升级可能变（精确匹配，避免命中聊天记录里的句子） */
+      var apprNodes = document.querySelectorAll('span, div');
+      for (var an = 0; an < apprNodes.length && !appr; an++) {
+        var anode = apprNodes[an];
+        var aown = Array.prototype.filter.call(anode.childNodes, function (n) { return n.nodeType === 3; })
           .map(function (n) { return n.textContent; }).join('');
-        if (own.indexOf('等待执行') >= 0 && tnode.closest && tnode.closest('.wSkVaW_composerSeat')) {
-          var anc = tnode;
-          for (var up = 0; up < 6 && anc; up++) {
-            var acs = window.getComputedStyle(anc);
-            var ar = anc.getBoundingClientRect();
-            if (acs.display !== 'none' && acs.visibility !== 'hidden' && ar.width > 100 && ar.width < 1200 && ar.height > 0) {
-              dockEl = anc;
+        if (aown.trim() === '等待审批') {
+          var aanc = anode;
+          for (var aup = 0; aup < 7 && aanc; aup++) {
+            var aacs = window.getComputedStyle(aanc);
+            var aar = aanc.getBoundingClientRect();
+            if (aacs.display !== 'none' && aacs.visibility !== 'hidden' && aar.width > 280 && aar.height > 60 &&
+                aar.top > -60 && aar.bottom < window.innerHeight + 240) {
+              appr = aanc;
               break;
             }
-            anc = anc.parentElement;
+            aanc = aanc.parentElement;
           }
         }
       }
     }
-    if (dockEl) {
-      var dr2 = dockEl.getBoundingClientRect();
-      hudEl.style.bottom = Math.max(16, window.innerHeight - dr2.top + 16) + 'px';
-      hudEl.style.right = Math.max(6, window.innerWidth - dr2.right + 6) + 'px';
-      return;
+    if (appr) {
+      var acs = window.getComputedStyle(appr);
+      var ar = appr.getBoundingClientRect();
+      if (acs.visibility !== 'hidden' && acs.display !== 'none' && ar.height > 0 && ar.width > 0) {
+        hudEl.style.bottom = Math.max(16, window.innerHeight - ar.top + 12) + 'px';
+        /* 横向保持平时“箭头旁”的位置（lastRightOff），不随审批面板跑到视口右缘 */
+        hudEl.style.right = (lastRightOff !== null ? lastRightOff : Math.max(6, window.innerWidth - ar.right + 6)) + 'px';
+        return;
+      }
     }
-    /* 2) 默认：贴对话框上沿右侧 */
+    /* 2) 默认：锚定输入区(composerSeat)上沿 —— 等待任务栏出现时自动上移；
+          右对齐输入框，并避让 DSH 原生“回到底部”按钮（偏移量缓存，按钮显隐不引起跳动） */
     var sel = ['.uV2eYG_card', '.uV2eYG_root', '.wSkVaW_composerSeat'];
     var el = null;
     for (var i = 0; i < sel.length; i++) {
@@ -2070,8 +2078,28 @@
     }
     if (el) {
       var rect2 = el.getBoundingClientRect();
-      var newBottom = Math.max(16, window.innerHeight - rect2.top + 16);
-      var rightOff = Math.max(6, window.innerWidth - rect2.right + 6);
+      var anchorTop = rect2.top;
+      var seat = document.querySelector('.wSkVaW_composerSeat');
+      if (seat) {
+        var scs = window.getComputedStyle(seat);
+        var sr = seat.getBoundingClientRect();
+        if (scs.visibility !== 'hidden' && scs.display !== 'none' && sr.height > 0) anchorTop = sr.top;
+      }
+      if (hudRightPad === null) {
+        var nb = document.querySelector('.Md3f7G_toBottom');
+        if (nb) {
+          var ncs = window.getComputedStyle(nb);
+          var nr = nb.getBoundingClientRect();
+          if (ncs.display !== 'none' && ncs.visibility !== 'hidden' && nr.width > 0 && nr.right <= rect2.right) {
+            hudRightPad = (rect2.right - nr.left) + 10;
+          }
+        }
+      }
+      var newBottom = Math.max(16, window.innerHeight - anchorTop + 12);
+      var rightOff = hudRightPad !== null
+        ? Math.max(6, window.innerWidth - rect2.right + hudRightPad)
+        : Math.max(6, window.innerWidth - rect2.right + 6);
+      lastRightOff = rightOff;
       hudEl.style.bottom = newBottom + 'px';
       hudEl.style.right = rightOff + 'px';
     } else {
@@ -2112,6 +2140,158 @@
       };
       xhr.send();
     } catch (e) { /* ignore */ }
+  }
+
+  /* ---- 右侧本会话提问导航（1:1 复刻 chat.deepseek.com scroll-nav：悬停展开、移开自动回收） ---- */
+  var railWrapEl = null;
+  var railPanelEl = null;
+  var railTimer = null;
+  var lastActiveQ = null;
+
+  function escapeHtml(s) {
+    return String(s).replace(/[&<>"']/g, function (c) {
+      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
+    });
+  }
+
+  function getQuestionItems() {
+    var qs = Array.prototype.slice.call(document.querySelectorAll('.Md3f7G_flowItem[data-chat-flow-kind="user"]'));
+    return qs.slice(0, 120);
+  }
+
+  function buildRail() {
+    var wrap = document.createElement('div');
+    wrap.className = 'neko-rail';
+    wrap.innerHTML =
+      '<div class="neko-rail-bg"></div>' +
+      '<div class="neko-rail-panel">' +
+      '  <div class="neko-rail-list"></div>' +
+      '</div>';
+    document.body.appendChild(wrap);
+    railWrapEl = wrap;
+    railPanelEl = wrap.querySelector('.neko-rail-panel');
+    wrap.title = '会话内容（悬停展开，移开自动收起）';
+
+    wrap.addEventListener('mouseenter', function () {
+      clearTimeout(railTimer);
+      railTimer = setTimeout(openRail, 120);
+    });
+    wrap.addEventListener('pointermove', function () {
+      /* 兜底：高负载下 mouseenter 偶发丢失，指针活动即安排展开（幂等） */
+      if (!railWrapEl || railWrapEl.classList.contains('neko-rail-open')) return;
+      clearTimeout(railTimer);
+      railTimer = setTimeout(openRail, 120);
+    });
+    wrap.addEventListener('mouseleave', function (e) {
+      if (e.relatedTarget && wrap.contains(e.relatedTarget)) return;
+      clearTimeout(railTimer);
+      railTimer = setTimeout(closeRail, 400);
+    });
+    railPanelEl.addEventListener('mouseleave', function (e) {
+      if (e.relatedTarget && wrap.contains(e.relatedTarget)) return;
+      clearTimeout(railTimer);
+      railTimer = setTimeout(closeRail, 400);
+    });
+  }
+
+  function openRail() {
+    if (!railWrapEl) return;
+    railWrapEl.classList.add('neko-rail-open');
+    refreshQuestionList();
+  }
+
+  function closeRail() {
+    if (railWrapEl) railWrapEl.classList.remove('neko-rail-open');
+  }
+
+  function scrollToMessage(el) {
+    var sc = findScrollContainer() || document.querySelector('.wSkVaW_scrollBody');
+    if (!sc) {
+      if (el.scrollIntoView) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
+      return;
+    }
+    var sr = sc.getBoundingClientRect();
+    var er = el.getBoundingClientRect();
+    var top = sc.scrollTop + (er.top - sr.top) - 96;
+    sc.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
+  }
+
+  function refreshQuestionList() {
+    if (!railPanelEl) return;
+    var list = railPanelEl.querySelector('.neko-rail-list');
+    if (!list) return;
+    list.innerHTML = '';
+    var qs = getQuestionItems();
+    if (!qs.length) {
+      list.innerHTML = '<div class="neko-rail-empty">当前会话还没有提问</div>';
+      return;
+    }
+    for (var i = 0; i < qs.length; i++) {
+      (function (q) {
+        var bubble = q.querySelector('.gdEzaW_bubble');
+        var text = (bubble ? bubble.textContent : q.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80);
+        if (!text) text = '（无文字消息）';
+        var item = document.createElement('div');
+        item.className = 'neko-rail-item';
+        item.innerHTML =
+          '<span class="neko-rail-item-title">' + escapeHtml(text) + '</span>' +
+          '<span class="neko-rail-item-line"></span>';
+        item.title = text;
+        item.addEventListener('click', function (e) {
+          e.stopPropagation();
+          scrollToMessage(q);
+          closeRail();
+        });
+        list.appendChild(item);
+      })(qs[i]);
+    }
+    lastActiveQ = null;
+    refreshActiveQuestion();
+  }
+
+  /* 滚动时把当前视野内的提问高亮 */
+  function refreshActiveQuestion() {
+    if (!railPanelEl) return;
+    var list = railPanelEl.querySelector('.neko-rail-list');
+    if (!list || !list.children.length || list.firstChild.classList.contains('neko-rail-empty')) return;
+    var sc = findScrollContainer() || document.querySelector('.wSkVaW_scrollBody');
+    if (!sc) return;
+    var qs = getQuestionItems();
+    if (qs.length !== list.children.length) {
+      /* 提问数量变化（新消息/加载更早）：重建列表 */
+      refreshQuestionList();
+      return;
+    }
+    var sr = sc.getBoundingClientRect();
+    var active = null;
+    for (var i = 0; i < qs.length; i++) {
+      var r = qs[i].getBoundingClientRect();
+      if (r.top <= sr.top + 170) active = qs[i]; else break;
+    }
+    if (!active && qs.length) active = qs[0]; /* 在最顶端：高亮第一条 */
+    if (active === lastActiveQ) return;
+    lastActiveQ = active;
+    var items = list.children;
+    for (var j = 0; j < items.length; j++) {
+      items[j].classList.toggle('neko-rail-item-active', qs[j] === active);
+    }
+    if (active) {
+      var idx = qs.indexOf(active);
+      var actItem = items[idx];
+      if (actItem && actItem.scrollIntoView) actItem.scrollIntoView({ block: 'nearest' });
+    }
+  }
+
+  /* ---- 滚动容器查找（提问导航滚动 / 活跃项计算用） ---- */
+  var lastLayoutRefresh = 0;
+
+  function findScrollContainer() {
+    var cands = ['.wSkVaW_scrollBody', '.Md3f7G_root', '.Md3f7G_scroll', '.Md3f7G_column'];
+    for (var i = 0; i < cands.length; i++) {
+      var el = document.querySelector(cands[i]);
+      if (el && el.scrollHeight > el.clientHeight + 60) return el;
+    }
+    return null;
   }
 
   /* ---- 猫娘宠物（头像 + 蕾丝圆框 + 悬停互动菜单） ---- */
@@ -2302,6 +2482,15 @@
     positionBalance();
     setTimeout(refreshBalance, 4000);
     setInterval(refreshBalance, 30 * 60 * 1000);
+    /* 右侧本会话提问导航（回到最新用 DSH 原生按钮，皮肤只做样式） */
+    buildRail();
+    document.addEventListener('scroll', function () {
+      var now = Date.now();
+      if (now - lastLayoutRefresh < 150) return;
+      lastLayoutRefresh = now;
+      positionBalance();
+      refreshActiveQuestion();
+    }, true);
     /* 截图模式处理 */
     if (window.__nekoShot) {
       if (window.__nekoShot.menu && petWrap) {
@@ -2323,6 +2512,15 @@
       if (mode === 'auto') apply();
     });
     mo.observe(document.body, { attributes: true, attributeFilter: ['data-ds-dark-theme'] });
+
+    /* 布局即时响应：任务栏 / 审批面板等出现或消失时立刻重定位 HUD（200ms 节流） */
+    var moLayout = new MutationObserver(function () {
+      var now = Date.now();
+      if (now - lastLayoutRefresh < 200) return;
+      lastLayoutRefresh = now;
+      positionBalance();
+    });
+    moLayout.observe(document.body, { childList: true, subtree: true });
 
     window.addEventListener('storage', function (e) {
       if (e.key === KEY) {
