@@ -2,7 +2,7 @@
 
 给 DeepSeek Harness Web GUI 换上一套「洛丽塔猫娘女仆」皮肤：昼夜双主题、右下角会叫"欧尼酱"的互动猫娘桌宠、猫爪光标、全屏告白文字雨……个人学习交流用，非商业。
 
-> **当前版本 v1.1.3** · 更新日志见 [CHANGELOG.md](CHANGELOG.md)
+> **当前版本 v1.1.4** · 更新日志见 [CHANGELOG.md](CHANGELOG.md)
 >
 > 灵感来自 [deep-whale-day-night-theme](https://github.com/GGBond2424648901/deep-whale-day-night-theme) 的昼夜主题设计思路，以及 B 站 / [深海女仆工坊 maid-atelier](https://github.com/Small-tailqwq/dsh-deep-whale) 的女仆换肤生态，素材与桌宠形象为本人用 ComfyUI（Qwen-Image）生成的原创猫娘。
 
@@ -28,7 +28,7 @@
 - 🎙 **语音**：刷新问候 + 聊天回复朗读（Windows 自然语音优先，萝莉音调参；无机械音回退）
 - 隐藏成就：💢连点 10 次解锁"逗她"；💋投喂+喝茶满 300 次解锁"亲亲"（全屏告白文字雨）
 - ⏰ 工作时长关怀：每 10 分钟请喝茶；连续 6 小时"喝茶"常驻
-- 🏆 好感度等级 Lv1~Lv10（十级称号）+ 节日彩蛋（元旦/情人节/七夕/圣诞/生日）
+- 🏆 好感度等级 Lv1~Lv10（十级称号）+ 节日彩蛋：元旦 / 春节 / 元宵 / 情人节 / 儿童节 / 端午 / 七夕 / 中秋 / 国庆 / 万圣节 / 平安夜 / 圣诞 / 生日（农历节日内置 2026-2040 公历对照表）
 - 智能表情：think 思考 / search 翻书查阅 / **edit 执笔改文件 / pwsh 敲终端** / 打字认真 / 回答完成庆祝
 - 吃醋（30 分钟不理她）与打盹（5 分钟）机制、"欧尼酱"台词气泡常驻（每种效果 10+ 条）
 
@@ -53,6 +53,10 @@
 **🌙 猫娘特写 · 夜间**
 
 <p align="center"><img src="docs/neko-pet-closeup-night.png" width="640" alt="猫娘特写·夜间"></p>
+
+**😺 表情图鉴（16 种表情一览）**
+
+<p align="center"><img src="docs/neko-expressions-grid.png" width="960" alt="猫娘表情图鉴"></p>
 
 ---
 
