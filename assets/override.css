@@ -1,11 +1,11 @@
 /* ============================================================
-   猫娘昼夜主题 v2 · Neko Day/Night Skin for DeepSeek Harness Web GUI
+   猫娘女仆主题 v1.1.3 · Neko Day/Night Skin for DeepSeek Harness Web GUI
    ------------------------------------------------------------
    灵感组合自 Deep Whale 昼夜主题（水晶白昼 / 月潮夜晚 / 玻璃面板 /
-   花边 / 动态氛围 / Q版宠物），宠物与素材使用前面生成的猫娘。
+   花边 / 动态氛围 / Q版宠物），宠物与素材为 ComfyUI 生成的原创猫娘。
 
-   用法（见 install-neko-daynight.ps1）：
-     1. 把 override.css / neko-theme.js / neko-bg-night.jpg 放到
+   用法（见 install.ps1 / install.bat）：
+     1. 把 override.css / neko-theme.js / neko-bg-day.jpg / neko-bg-night.jpg 放到
         dsh-web-frontend/dist/assets/
      2. dist/index.html 里引入：
           <link rel="stylesheet" href="/assets/override.css?v=N">
@@ -14,9 +14,10 @@
 
    模式机制：
      - html[data-neko] 由 neko-theme.js 维护：day | night。
-     - 自动模式跟随 DSH 的 body[data-ds-dark-theme]（系统偏好/设置）。
-     - 页面底部右侧的 Q版猫娘是切换按钮：点一下 日→夜→自动。
-     注意：调色板全部 !important，能压过主题系统写入 body 的内联 token。
+     - 自动模式按系统时钟切换（18:00-6:00 为夜）。
+     - 猫娘菜单里的「主题」按钮：日 → 夜 → 自动 三态切换。
+     - 调色板全部 !important，能压过主题系统写入 body 的内联 token。
+     - 标志 "harness" 徽章为反色镂空：药丸与文字互为反色。
    ============================================================ */
 
 /* ============================================================
@@ -551,6 +552,7 @@ html[data-neko="night"] .neko-sun { display: none; }
   display: flex;
   align-items: center;
   gap: 8px;
+  transition: bottom 0.25s ease, right 0.25s ease;
 }
 .neko-price {
   display: flex;
@@ -623,6 +625,188 @@ html[data-neko="night"] .neko-sun { display: none; }
 .neko-balance-value {
   color: var(--dsw-alias-brand-primary);
   font-weight: 600;
+}
+/* 右侧会话内容导航（1:1 复刻 chat.deepseek.com scroll-nav） */
+.neko-rail {
+  position: fixed;
+  right: 16px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  height: 300px;
+  border-radius: 8px;
+  z-index: 1210;
+  display: flex;
+  align-items: center;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: all 0.2s ease;
+}
+.neko-rail-bg {
+  position: absolute;
+  top: 50%;
+  right: 0;
+  transform: translateY(-50%);
+  width: 34px;
+  height: calc(100% - 8px);
+  border-radius: 16px;
+  background-color: rgba(255, 255, 255, 0.8);
+  -webkit-backdrop-filter: blur(5px);
+  backdrop-filter: blur(5px);
+  z-index: -1;
+  pointer-events: none;
+}
+body[data-ds-dark-theme] .neko-rail-bg {
+  background-color: rgba(21, 21, 23, 0.6);
+}
+html[data-neko="night"] .neko-rail-bg {
+  background-color: rgba(21, 21, 23, 0.6);
+}
+.neko-rail-panel {
+  position: absolute;
+  right: 0;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 34px;
+  max-width: 240px;
+  max-height: 100%;
+  border-radius: 16px;
+  border: 1px solid transparent;
+  overflow: hidden;
+  pointer-events: none;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, width 0.2s ease;
+}
+.neko-rail-open .neko-rail-panel {
+  width: 240px;
+  pointer-events: auto;
+  background: var(--dsw-alias-bg-layer-1);
+  box-shadow: var(--dsw-shadow-lv3);
+  border-color: var(--dsw-alias-border-inverted);
+}
+.neko-rail-panel::before,
+.neko-rail-panel::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  width: 100%;
+  height: 32px;
+  z-index: 2;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.2s ease;
+  background: linear-gradient(180deg, #fff 20.19%, rgba(255, 255, 255, 0) 100%);
+}
+body[data-ds-dark-theme] .neko-rail-panel::before,
+body[data-ds-dark-theme] .neko-rail-panel::after {
+  background: linear-gradient(180deg, var(--dsw-alias-bg-layer-1) 20.19%, rgba(35, 35, 36, 0) 100%);
+}
+html[data-neko="night"] .neko-rail-panel::before,
+html[data-neko="night"] .neko-rail-panel::after {
+  background: linear-gradient(180deg, var(--dsw-alias-bg-layer-1) 20.19%, rgba(35, 35, 36, 0) 100%);
+}
+.neko-rail-panel::before {
+  top: 0;
+}
+.neko-rail-panel::after {
+  bottom: 0;
+  transform: rotate(180deg);
+}
+.neko-rail-open .neko-rail-panel::before,
+.neko-rail-open .neko-rail-panel::after {
+  opacity: 1;
+}
+.neko-rail-list {
+  max-height: 250px;
+  padding: 15px 0 15px 24px;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  align-items: flex-end;
+  position: relative;
+  overflow-y: auto;
+  scrollbar-width: none;
+}
+.neko-rail-list::-webkit-scrollbar {
+  width: 0;
+  height: 0;
+  display: none;
+}
+.neko-rail-item {
+  cursor: pointer;
+  height: 30px;
+  color: var(--dsw-alias-label-tertiary);
+  display: flex;
+  justify-content: flex-end;
+  align-items: center;
+  width: calc(100% - 6px);
+  margin-right: 8px;
+  line-height: 20px;
+  flex: none;
+}
+.neko-rail-item-title {
+  font-size: 13px;
+  line-height: 20px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  margin-right: 12px;
+  max-width: 196px;
+  opacity: 0;
+  transition: opacity 0.1s ease, color 0.2s ease;
+}
+.neko-rail-open .neko-rail-item-title {
+  opacity: 1;
+}
+.neko-rail-item-line {
+  flex: none;
+  width: 8px;
+  height: 2px;
+  border-radius: 4px;
+  background-color: var(--dsw-alias-border-l4);
+  transition: background-color 0.2s ease, transform 0.2s ease;
+}
+.neko-rail-item:hover {
+  color: var(--dsw-alias-label-primary);
+}
+.neko-rail-item:hover .neko-rail-item-title {
+  color: var(--dsw-alias-label-primary);
+}
+.neko-rail-item:hover .neko-rail-item-line {
+  background-color: var(--dsw-alias-label-primary);
+}
+.neko-rail-item-active .neko-rail-item-title {
+  color: var(--dsw-alias-brand-text);
+  font-weight: 500;
+}
+.neko-rail-item-active .neko-rail-item-line {
+  background-color: var(--dsw-alias-brand-text);
+  transform: scale(1.5);
+}
+.neko-rail-empty {
+  padding: 10px 12px;
+  font-size: 12px;
+  color: var(--dsw-alias-label-secondary);
+  white-space: nowrap;
+}
+@media (max-width: 767px) {
+  .neko-rail {
+    display: none;
+  }
+}
+/* DSH 原生“回到底部”按钮：皮肤化（粉色主题） */
+.Md3f7G_toBottom {
+  background: var(--dsw-alias-bg-overlay) !important;
+  border: 1px solid var(--dsw-alias-border-l2) !important;
+  box-shadow: var(--dsw-shadow-lv2) !important;
+  color: var(--neko-caret) !important;
+  transition: background 0.15s ease, box-shadow 0.15s ease !important;
+}
+.Md3f7G_toBottom:hover {
+  background: var(--dsw-alias-bg-layer-1) !important;
+  box-shadow: 0 0 12px var(--neko-aura) !important;
 }
 .neko-pet-wrap::after {
   content: "";
@@ -997,6 +1181,20 @@ input, textarea, select,
 /* 夜间：女仆帽微微发光 */
 html[data-neko="night"] .hHd-Xa_logoRow::after {
   filter: drop-shadow(0 0 6px rgba(255, 143, 192, 0.5));
+}
+/* 标志 "harness" 徽章：反色镂空 —— 药丸底色与文字互为反色，
+   白天深色药丸 + 浅色字，夜间浅色药丸 + 深色字，两种模式都清晰 */
+.hHd-Xa_brand rect[x="129.348"] {
+  fill: #4a2b3a;
+}
+html[data-neko="night"] .hHd-Xa_brand rect[x="129.348"] {
+  fill: #f2ecff;
+}
+.hHd-Xa_brand path[fill="var(--dsw-alias-label-primary-inverted)"] {
+  fill: #fff7fb;
+}
+html[data-neko="night"] .hHd-Xa_brand path[fill="var(--dsw-alias-label-primary-inverted)"] {
+  fill: #241a3e;
 }
 
 /* 窗口自适应：小窗/矮窗时整体缩小，不遮挡对话框 */
