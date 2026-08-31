@@ -25,7 +25,7 @@ $skinFiles = @(
   'neko-pet-sleep.png', 'neko-pet-watch.png', 'neko-pet-think.png',
   'neko-pet-tea.png', 'neko-pet-search.png', 'neko-pet-edit.png',
   'neko-pet-pwsh.png', 'neko-pet-chin.png', 'neko-pet-tail.png',
-  'neko-pet-jealous.png', 'neko-ds-key.js'
+  'neko-pet-jealous.png', 'neko-ds-key.js', 'neko-keys.js'
 )
 
 $idxBak = Get-ChildItem $BackupDir -Filter 'index-*.html.bak' -ErrorAction SilentlyContinue |
@@ -45,6 +45,7 @@ foreach ($root in $Candidates) {
     $html = [regex]::Replace($html, '<link rel="stylesheet" href="/assets/override\.css[^"]*">\s*', '')
     $html = [regex]::Replace($html, '<script src="/assets/neko-theme\.js"[^>]*></script>\s*', '')
     $html = [regex]::Replace($html, '<script src="/assets/neko-ds-key\.js"[^>]*></script>\s*', '')
+    $html = [regex]::Replace($html, '<script src="/assets/neko-keys\.js"[^>]*></script>\s*', '')
     [System.IO.File]::WriteAllText($idxFile, $html, (New-Object System.Text.UTF8Encoding($false)))
     Write-Host "[OK] stripped skin references (no backup found)"
   }
