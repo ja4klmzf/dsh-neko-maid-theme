@@ -1,5 +1,5 @@
 /* ============================================================
-   猫娘女仆主题 v1.1.3 · Neko Day/Night Skin for DeepSeek Harness Web GUI
+   猫娘女仆主题 v1.1.7 · Neko Day/Night Skin for DeepSeek Harness Web GUI
    ------------------------------------------------------------
    灵感组合自 Deep Whale 昼夜主题（水晶白昼 / 月潮夜晚 / 玻璃面板 /
    花边 / 动态氛围 / Q版宠物），宠物与素材为 ComfyUI 生成的原创猫娘。
@@ -354,7 +354,8 @@ html[data-neko="night"] .neko-bg-day { opacity: 0; }
 .pI_x6G_sidebarCol {
   background: var(--neko-glass-sidebar) !important;
 }
-.hHd-Xa_root {
+.hHd-Xa_root,
+.bhn1Oq_root {
   background: transparent !important;
 }
 .wSkVaW_root {
@@ -597,6 +598,10 @@ html[data-neko="night"] .neko-sun { display: none; }
   color: #5f7cf8;
   border-color: rgba(95, 124, 248, 0.5);
 }
+.neko-price.flat {
+  color: #22a06b;
+  border-color: rgba(34, 160, 107, 0.5);
+}
 /* DeepSeek API 余额显示框（HUD 右半） */
 .neko-balance {
   position: relative;
@@ -626,177 +631,8 @@ html[data-neko="night"] .neko-sun { display: none; }
   color: var(--dsw-alias-brand-primary);
   font-weight: 600;
 }
-/* 右侧会话内容导航（1:1 复刻 chat.deepseek.com scroll-nav） */
-.neko-rail {
-  position: fixed;
-  right: 16px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 34px;
-  height: 300px;
-  border-radius: 8px;
-  z-index: 1210;
-  display: flex;
-  align-items: center;
-  user-select: none;
-  -webkit-user-select: none;
-  transition: all 0.2s ease;
-}
-.neko-rail-bg {
-  position: absolute;
-  top: 50%;
-  right: 0;
-  transform: translateY(-50%);
-  width: 34px;
-  height: calc(100% - 8px);
-  border-radius: 16px;
-  background-color: rgba(255, 255, 255, 0.8);
-  -webkit-backdrop-filter: blur(5px);
-  backdrop-filter: blur(5px);
-  z-index: -1;
-  pointer-events: none;
-}
-body[data-ds-dark-theme] .neko-rail-bg {
-  background-color: rgba(21, 21, 23, 0.6);
-}
-html[data-neko="night"] .neko-rail-bg {
-  background-color: rgba(21, 21, 23, 0.6);
-}
-.neko-rail-panel {
-  position: absolute;
-  right: 0;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 34px;
-  max-width: 240px;
-  max-height: 100%;
-  border-radius: 16px;
-  border: 1px solid transparent;
-  overflow: hidden;
-  pointer-events: none;
-  display: flex;
-  flex-direction: column;
-  align-items: stretch;
-  transition: background 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease, width 0.2s ease;
-}
-.neko-rail-open .neko-rail-panel {
-  width: 240px;
-  pointer-events: auto;
-  background: var(--dsw-alias-bg-layer-1);
-  box-shadow: var(--dsw-shadow-lv3);
-  border-color: var(--dsw-alias-border-inverted);
-}
-.neko-rail-panel::before,
-.neko-rail-panel::after {
-  content: "";
-  position: absolute;
-  left: 0;
-  width: 100%;
-  height: 32px;
-  z-index: 2;
-  pointer-events: none;
-  opacity: 0;
-  transition: opacity 0.2s ease;
-  background: linear-gradient(180deg, #fff 20.19%, rgba(255, 255, 255, 0) 100%);
-}
-body[data-ds-dark-theme] .neko-rail-panel::before,
-body[data-ds-dark-theme] .neko-rail-panel::after {
-  background: linear-gradient(180deg, var(--dsw-alias-bg-layer-1) 20.19%, rgba(35, 35, 36, 0) 100%);
-}
-html[data-neko="night"] .neko-rail-panel::before,
-html[data-neko="night"] .neko-rail-panel::after {
-  background: linear-gradient(180deg, var(--dsw-alias-bg-layer-1) 20.19%, rgba(35, 35, 36, 0) 100%);
-}
-.neko-rail-panel::before {
-  top: 0;
-}
-.neko-rail-panel::after {
-  bottom: 0;
-  transform: rotate(180deg);
-}
-.neko-rail-open .neko-rail-panel::before,
-.neko-rail-open .neko-rail-panel::after {
-  opacity: 1;
-}
-.neko-rail-list {
-  max-height: 250px;
-  padding: 15px 0 15px 24px;
-  overscroll-behavior: contain;
-  display: flex;
-  flex-direction: column;
-  align-items: flex-end;
-  position: relative;
-  overflow-y: auto;
-  scrollbar-width: none;
-}
-.neko-rail-list::-webkit-scrollbar {
-  width: 0;
-  height: 0;
-  display: none;
-}
-.neko-rail-item {
-  cursor: pointer;
-  height: 30px;
-  color: var(--dsw-alias-label-tertiary);
-  display: flex;
-  justify-content: flex-end;
-  align-items: center;
-  width: calc(100% - 6px);
-  margin-right: 8px;
-  line-height: 20px;
-  flex: none;
-}
-.neko-rail-item-title {
-  font-size: 13px;
-  line-height: 20px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
-  margin-right: 12px;
-  max-width: 196px;
-  opacity: 0;
-  transition: opacity 0.1s ease, color 0.2s ease;
-}
-.neko-rail-open .neko-rail-item-title {
-  opacity: 1;
-}
-.neko-rail-item-line {
-  flex: none;
-  width: 8px;
-  height: 2px;
-  border-radius: 4px;
-  background-color: var(--dsw-alias-border-l4);
-  transition: background-color 0.2s ease, transform 0.2s ease;
-}
-.neko-rail-item:hover {
-  color: var(--dsw-alias-label-primary);
-}
-.neko-rail-item:hover .neko-rail-item-title {
-  color: var(--dsw-alias-label-primary);
-}
-.neko-rail-item:hover .neko-rail-item-line {
-  background-color: var(--dsw-alias-label-primary);
-}
-.neko-rail-item-active .neko-rail-item-title {
-  color: var(--dsw-alias-brand-text);
-  font-weight: 500;
-}
-.neko-rail-item-active .neko-rail-item-line {
-  background-color: var(--dsw-alias-brand-text);
-  transform: scale(1.5);
-}
-.neko-rail-empty {
-  padding: 10px 12px;
-  font-size: 12px;
-  color: var(--dsw-alias-label-secondary);
-  white-space: nowrap;
-}
-@media (max-width: 767px) {
-  .neko-rail {
-    display: none;
-  }
-}
 /* DSH 原生“回到底部”按钮：皮肤化（粉色主题） */
+.EvIC1a_toBottom,
 .Md3f7G_toBottom {
   background: var(--dsw-alias-bg-overlay) !important;
   border: 1px solid var(--dsw-alias-border-l2) !important;
@@ -804,6 +640,7 @@ html[data-neko="night"] .neko-rail-panel::after {
   color: var(--neko-caret) !important;
   transition: background 0.15s ease, box-shadow 0.15s ease !important;
 }
+.EvIC1a_toBottom:hover,
 .Md3f7G_toBottom:hover {
   background: var(--dsw-alias-bg-layer-1) !important;
   box-shadow: 0 0 12px var(--neko-aura) !important;
@@ -991,20 +828,6 @@ html[data-neko="night"] .neko-pet-img {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-7px); }
 }
-/* 点击飘出的爱心 */
-.neko-heart {
-  position: fixed;
-  z-index: 1240;
-  pointer-events: none;
-  color: #ff6aa7;
-  text-shadow: 0 0 6px rgba(255, 126, 179, 0.6);
-  animation: neko-heart-up 1.7s ease-out forwards;
-}
-@keyframes neko-heart-up {
-  0% { opacity: 0; transform: translate(-50%, 0) scale(0.5); }
-  12% { opacity: 1; }
-  100% { opacity: 0; transform: translate(-50%, -150px) scale(1.35); }
-}
 /* 梦幻光斑（午后阳光 bokeh，围绕萌妹浮动；夜间化为月尘） */
 .neko-bokeh {
   position: fixed;
@@ -1183,17 +1006,18 @@ html[data-neko="night"] .hHd-Xa_logoRow::after {
   filter: drop-shadow(0 0 6px rgba(255, 143, 192, 0.5));
 }
 /* 标志 "harness" 徽章：反色镂空 —— 药丸底色与文字互为反色，
-   白天深色药丸 + 浅色字，夜间浅色药丸 + 深色字，两种模式都清晰 */
-.hHd-Xa_brand rect[x="129.348"] {
+   白天深色药丸 + 浅色字，夜间浅色药丸 + 深色字，两种模式都清晰。
+   用 svg 属性选择器定位（不依赖哈希类名，抗 DSH 升级） */
+svg[viewBox="0 0 182 24"] rect[x="129.348"] {
   fill: #4a2b3a;
 }
-html[data-neko="night"] .hHd-Xa_brand rect[x="129.348"] {
+html[data-neko="night"] svg[viewBox="0 0 182 24"] rect[x="129.348"] {
   fill: #f2ecff;
 }
-.hHd-Xa_brand path[fill="var(--dsw-alias-label-primary-inverted)"] {
+svg[viewBox="0 0 182 24"] path[fill="var(--dsw-alias-label-primary-inverted)"] {
   fill: #fff7fb;
 }
-html[data-neko="night"] .hHd-Xa_brand path[fill="var(--dsw-alias-label-primary-inverted)"] {
+html[data-neko="night"] svg[viewBox="0 0 182 24"] path[fill="var(--dsw-alias-label-primary-inverted)"] {
   fill: #241a3e;
 }
 
@@ -1208,7 +1032,7 @@ html[data-neko="night"] .hHd-Xa_brand path[fill="var(--dsw-alias-label-primary-i
 @media (prefers-reduced-motion: reduce) {
   .neko-petal, .neko-star, .neko-moon, .neko-comet,
   .neko-bg-day, .neko-bg-night, .neko-pet-holder,
-  .neko-heart, .neko-bokeh, .neko-floaty, .neko-pet-img.pop {
+  .neko-bokeh, .neko-floaty, .neko-pet-img.pop {
     animation: none !important;
   }
   .neko-rain-text {
