@@ -1,5 +1,5 @@
 /* ============================================================
-   猫娘女仆主题 v1.1.4 · Neko Maid Theme for DeepSeek Harness Web GUI
+   猫娘女仆主题 v1.1.7 · Neko Maid Theme for DeepSeek Harness Web GUI
    ------------------------------------------------------------
    更新日志：https://github.com/ja4klmzf/dsh-neko-maid-theme/blob/main/CHANGELOG.md
    职责：
@@ -15,11 +15,9 @@
      6. 输入时切“认真看向对话框”；think 时切思考表情；
         每次回答结束开心庆祝
      7. 气泡常驻：说下一句才替换上一句
-      8. 右上 HUD：峰谷价格框 + DeepSeek 余额框，随布局平滑浮动，
-         避让等待任务栏 / 审批面板 / 原生“回到底部”按钮
-      9. 右侧本会话提问导航（复刻 chat.deepseek.com scroll-nav）：
-         悬停展开、移开自动回收、点击跳转、滚动高亮
-     10. DSH 原生「回到底部」按钮皮肤化（样式在 override.css）
+      8. 右上 HUD（随布局平滑浮动，避让任务栏/审批面板/选择菜单/原生回底按钮）：
+         单价框 + 余额框按当前模型切换供应商 —— DeepSeek（峰谷价+余额）、
+         Kimi（美元单价+Moonshot 余额）、GLM（美元单价，余额无公开接口）
    部署：dist/assets/neko-theme.js，index.html 中 <script defer> 引入
    ============================================================ */
 (function () {
@@ -1675,7 +1673,7 @@
     var left = r.left + (r.width - wrapW) / 2;
     var top;
     /* 下边缘停靠在侧边栏底部脚区（设置框等按钮区域）之上 */
-    var foot = document.querySelector('.hHd-Xa_footArea') || document.querySelector('.VOzbGW_rail');
+    var foot = document.querySelector('.hHd-Xa_footArea, .VOzbGW_rail, .bhn1Oq_rail, [class*="footArea"]');
     if (foot) {
       var fr = foot.getBoundingClientRect();
       top = fr.top - 8 - wrapH / 2 - visH / 2;
@@ -1768,7 +1766,7 @@
     }
     petWrap.style.left = 'auto';
     petWrap.style.top = 'auto';
-    /* 右侧留出会话导航（scroll-nav）的空间，默认右距 56px */
+    /* 右侧留出 DSH 自带的会话导航空间，默认右距 56px */
     petWrap.style.right = '56px';
     if (el) {
       var top = el.getBoundingClientRect().top;
@@ -1917,7 +1915,12 @@
     positionPet();
     positionBalance();
     refreshPrice();
-    refreshActiveQuestion();
+    /* 模型供应商切换（DeepSeek / Kimi / GLM）时：立即刷新余额（价格由 refreshPrice 自行跟随） */
+    var prov = detectProvider();
+    if (prov !== lastProvider) {
+      lastProvider = prov;
+      refreshBalance();
+    }
   }
 
   function bindPositionWatcher() {
@@ -1962,9 +1965,13 @@
   var priceBoxEl = null;
   var balanceBoxEl = null;
   var balanceValueEl = null;
+  var balanceLabelEl = null;
   var balanceKey = null;
   var hudRightPad = null; /* 缓存：输入框右缘到 HUD 右缘的偏移（避让原生“回到底部”按钮） */
   var lastRightOff = null; /* 缓存：最近一次正常态下的 right 偏移（审批/异常态保持横向位置不漂移） */
+  var hudHiddenByMenu = false; /* 模型/推理等级选择弹层遮挡 HUD 时暂时隐藏 */
+  var lastHudRect = null; /* 缓存：HUD 最近一次可见位置（弹层遮挡判断用） */
+  var lastProvider = null; /* 缓存：当前模型供应商，切换时刷新价格与余额 */
 
   function getBalanceKey() {
     if (balanceKey) return balanceKey;
@@ -1974,6 +1981,10 @@
     } catch (e) { /* ignore */ }
     if (window.__NEKO_DS_KEY__) {
       balanceKey = window.__NEKO_DS_KEY__;
+      return balanceKey;
+    }
+    if (window.__NEKO_KEYS__ && window.__NEKO_KEYS__.deepseek) {
+      balanceKey = window.__NEKO_KEYS__.deepseek;
       return balanceKey;
     }
     return null;
@@ -2010,14 +2021,66 @@
     return { peak: peak, next: next };
   }
 
+  /* ---- 供应商识别（模型选择器触发按钮上的当前模型名） ---- */
+  function detectProvider() {
+    var labelEl = document.querySelector('._7KE1Ra_triggerLabel');
+    var label = labelEl ? (labelEl.textContent || '').trim() : '';
+    if (/glm/i.test(label)) return 'glm';
+    if (/kimi/i.test(label)) return 'kimi';
+    return 'deepseek'; /* 含 DeepSeek 及未识别模型 */
+  }
+
+  function currentModelLabel() {
+    var labelEl = document.querySelector('._7KE1Ra_triggerLabel');
+    return labelEl ? (labelEl.textContent || '').trim() : '';
+  }
+
+  /* GLM / Kimi 单价（美元 / 百万 tokens，2026-08 官方价，命中价另列） */
+  var GLM_PRICES = [
+    { re: /glm-5\.3/i, inp: '1.4', out: '4.4', hit: '0.26' },
+    { re: /GLM-4\.5-Air/i, inp: '0.2', out: '1.1', hit: '0.03' },
+    { re: /GLM-4\.6/i, inp: '0.6', out: '2.2', hit: '0.11' }
+  ];
+  var KIMI_PRICES = [
+    { re: /K3/, inp: '3', out: '15', hit: '0.30' },
+    { re: /K2\.7|K2\.6/, inp: '0.95', out: '4', hit: null },
+    { re: /K2\.5/, inp: '0.6', out: '3', hit: null },
+    { re: /K2/, inp: '0.6', out: '2.5', hit: null }
+  ];
+
+  function matchPrice(table, label) {
+    for (var i = 0; i < table.length; i++) {
+      if (table[i].re.test(label)) return table[i];
+    }
+    return table[0];
+  }
+
   function refreshPrice() {
     if (!priceBoxEl) return;
+    var provider = detectProvider();
+    if (provider !== 'deepseek') {
+      var label = currentModelLabel();
+      var row = matchPrice(provider === 'glm' ? GLM_PRICES : KIMI_PRICES, label);
+      var pname = provider === 'glm' ? 'GLM' : 'Kimi';
+      priceBoxEl.innerHTML =
+        '<span class="neko-price-icon">' + (provider === 'glm' ? '🌐' : '🌙') + '</span>' +
+        '<span class="neko-price-state">' + pname + '</span>' +
+        '<span class="neko-price-detail">输入 $' + row.inp + '/M · 输出 $' + row.out + '/M</span>';
+      priceBoxEl.classList.remove('peak', 'valley');
+      priceBoxEl.classList.add('flat');
+      priceBoxEl.title = pname + ' · ' + label + ' · 单位：美元 / 百万 tokens'
+        + '\n输入 $' + row.inp + ' · 输出 $' + row.out
+        + (row.hit ? ' · 缓存命中 $' + row.hit : '')
+        + '\n2026-08 官方价（Z.AI / Moonshot），以官网为准';
+      return;
+    }
     var st = priceState();
     var p = st.peak ? PRICE.peak : PRICE.valley;
     priceBoxEl.innerHTML =
       '<span class="neko-price-icon">' + p.icon + '</span>' +
       '<span class="neko-price-state">' + p.label + '</span>' +
       '<span class="neko-price-detail">输入 ' + p.input + '/M · 输出 ' + p.output + '/M</span>';
+    priceBoxEl.classList.remove('flat');
     priceBoxEl.classList.toggle('peak', st.peak);
     priceBoxEl.classList.toggle('valley', !st.peak);
     var m = Math.max(0, Math.round((st.next.getTime() - Date.now()) / 60000));
@@ -2050,10 +2113,18 @@
     el.innerHTML = '<span class="neko-balance-label">🐋 DeepSeek 余额</span><span class="neko-balance-value">--</span>';
     el.title = '点击刷新 / 设置 Key';
     el.addEventListener('click', function () {
-      var k = getBalanceKey();
+      var provider = detectProvider();
+      if (provider === 'glm') {
+        if (balanceValueEl) balanceValueEl.textContent = '--';
+        return;
+      }
+      var k = provider === 'kimi' ? getKimiKey() : getBalanceKey();
       if (!k) {
-        var input = window.prompt('请输入 DeepSeek API Key（仅保存在本机浏览器）:');
-        if (input && input.trim()) setBalanceKey(input.trim());
+        var input = window.prompt((provider === 'kimi' ? '请输入 Kimi(Moonshot) API Key' : '请输入 DeepSeek API Key') + '（仅保存在本机浏览器）:');
+        if (input && input.trim()) {
+          if (provider === 'kimi') setKimiKey(input.trim());
+          else setBalanceKey(input.trim());
+        }
       } else {
         refreshBalance();
       }
@@ -2061,23 +2132,69 @@
     (parent || document.body).appendChild(el);
     balanceBoxEl = el;
     balanceValueEl = el.querySelector('.neko-balance-value');
+    balanceLabelEl = el.querySelector('.neko-balance-label');
+  }
+
+  /* Kimi Key（本机浏览器 localStorage / 安装脚本注入） */
+  function getKimiKey() {
+    try {
+      var k = localStorage.getItem('neko-kimi-key');
+      if (k) return k;
+    } catch (e) { /* ignore */ }
+    if (window.__NEKO_KEYS__ && window.__NEKO_KEYS__.kimi) return window.__NEKO_KEYS__.kimi;
+    return null;
+  }
+
+  function setKimiKey(k) {
+    try { localStorage.setItem('neko-kimi-key', k); } catch (e) { /* ignore */ }
+    refreshBalance();
   }
 
   function positionBalance() {
     if (!hudEl) return;
+    /* 0) 模型/推理等级/模式选择弹层遮挡 HUD 时：暂时隐藏，弹层关闭自动恢复 */
+    var popped = false;
+    var popCands = document.querySelectorAll('._7KE1Ra_menu, [role="listbox"], [role="menu"]');
+    for (var pi = 0; pi < popCands.length && !popped; pi++) {
+      var pc = popCands[pi];
+      if (pc === hudEl) continue;
+      var pcs = window.getComputedStyle(pc);
+      var pr = pc.getBoundingClientRect();
+      if (pcs.display === 'none' || pcs.visibility === 'hidden') continue;
+      if (parseFloat(pcs.opacity || '1') < 0.1) continue; /* 已关闭的淡出弹层不算遮挡 */
+      if (pcs.pointerEvents === 'none') continue;
+      if (pc.closest && pc.closest('.neko-pet-wrap')) continue; /* 皮肤自身元素 */
+      if (pr.width < 8 || pr.height < 8) continue;
+      var hr = lastHudRect || hudEl.getBoundingClientRect();
+      if (hr.width < 8 || hr.height < 8) continue;
+      if (pr.left < hr.right - 4 && pr.right > hr.left + 4 && pr.top < hr.bottom - 4 && pr.bottom > hr.top + 4) {
+        popped = true;
+      }
+    }
+    if (popped) {
+      if (!hudHiddenByMenu) lastHudRect = hudEl.getBoundingClientRect();
+      hudHiddenByMenu = true;
+      hudEl.style.display = 'none';
+      return;
+    }
+    if (hudHiddenByMenu) {
+      hudHiddenByMenu = false;
+      hudEl.style.display = '';
+    }
     /* 1) deep diving（轨迹面板）可见时：锚定面板下缘同步浮动 */
-    var ledger = document.querySelector('.qBU-ya_ledger');
+    var ledger = document.querySelector('.qBU-ya_ledger, [class*="ledger"]');
     if (ledger) {
       var lcs = window.getComputedStyle(ledger);
       var lr = ledger.getBoundingClientRect();
       if (lcs.visibility !== 'hidden' && lcs.display !== 'none' && lr.height > 0 && lr.width > 0) {
         hudEl.style.bottom = Math.max(8, window.innerHeight - lr.bottom + 8) + 'px';
         hudEl.style.right = Math.max(6, window.innerWidth - lr.right + 6) + 'px';
+        lastHudRect = hudEl.getBoundingClientRect();
         return;
       }
     }
-    /* 1.4) 等待审批面板（bqrRRG_root 接管输入区）可见时：锚定面板上沿，避免 HUD 掉到角落漂移 */
-    var appr = document.querySelector('.bqrRRG_root');
+    /* 1.4) 等待审批面板（接管输入区）可见时：锚定面板上沿，避免 HUD 掉到角落漂移 */
+    var appr = document.querySelector('.mna1RW_root, .bqrRRG_root');
     if (!appr) {
       /* 文本兜底：类名是构建哈希，版本升级可能变（精确匹配，避免命中聊天记录里的句子） */
       var apprNodes = document.querySelectorAll('span, div');
@@ -2107,6 +2224,7 @@
         hudEl.style.bottom = Math.max(16, window.innerHeight - ar.top + 12) + 'px';
         /* 横向保持平时“箭头旁”的位置（lastRightOff），不随审批面板跑到视口右缘 */
         hudEl.style.right = (lastRightOff !== null ? lastRightOff : Math.max(6, window.innerWidth - ar.right + 6)) + 'px';
+        lastHudRect = hudEl.getBoundingClientRect();
         return;
       }
     }
@@ -2135,7 +2253,7 @@
         if (scs.visibility !== 'hidden' && scs.display !== 'none' && sr.height > 0) anchorTop = sr.top;
       }
       if (hudRightPad === null) {
-        var nb = document.querySelector('.Md3f7G_toBottom');
+        var nb = document.querySelector('.EvIC1a_toBottom, .Md3f7G_toBottom');
         if (nb) {
           var ncs = window.getComputedStyle(nb);
           var nr = nb.getBoundingClientRect();
@@ -2151,30 +2269,60 @@
       lastRightOff = rightOff;
       hudEl.style.bottom = newBottom + 'px';
       hudEl.style.right = rightOff + 'px';
+      lastHudRect = hudEl.getBoundingClientRect();
     } else {
       hudEl.style.bottom = '56px';
       hudEl.style.right = '14px';
+      lastHudRect = hudEl.getBoundingClientRect();
     }
   }
 
   function refreshBalance() {
-    var k = getBalanceKey();
+    var provider = detectProvider();
+    /* 标签随供应商切换 */
+    if (balanceLabelEl) {
+      balanceLabelEl.textContent = provider === 'glm' ? '🌐 GLM 余额'
+        : provider === 'kimi' ? '🌙 Kimi 余额'
+        : '🐋 DeepSeek 余额';
+    }
+    if (provider === 'glm') {
+      /* Z.AI / 智谱未提供公开余额接口 */
+      if (balanceValueEl) balanceValueEl.textContent = '--';
+      if (balanceBoxEl) balanceBoxEl.title = 'GLM（智谱）暂未提供余额查询接口，请登录官网控制台查看';
+      return;
+    }
+    var k = provider === 'kimi' ? getKimiKey() : getBalanceKey();
     if (!k) {
       if (balanceValueEl) balanceValueEl.textContent = '点此设置Key';
+      if (balanceBoxEl) balanceBoxEl.title = '点击设置 ' + (provider === 'kimi' ? 'Kimi(Moonshot)' : 'DeepSeek') + ' API Key';
       return;
     }
     if (balanceValueEl) balanceValueEl.textContent = '查询中...';
     try {
       var xhr = new XMLHttpRequest();
-      xhr.open('GET', 'https://api.deepseek.com/user/balance', true);
+      xhr.open('GET', provider === 'kimi'
+        ? 'https://api.moonshot.cn/v1/users/me/balance'
+        : 'https://api.deepseek.com/user/balance', true);
       xhr.setRequestHeader('Authorization', 'Bearer ' + k);
       xhr.timeout = 15000;
       xhr.onload = function () {
         try {
           var j = JSON.parse(xhr.responseText);
+          if (provider === 'kimi') {
+            if (j && j.data && typeof j.data.available_balance === 'number') {
+              if (balanceValueEl) balanceValueEl.textContent = '¥ ' + j.data.available_balance;
+              if (balanceBoxEl) balanceBoxEl.title = 'Kimi 可用余额（Moonshot 平台）· 点击刷新';
+            } else if (j && j.error) {
+              if (balanceValueEl) balanceValueEl.textContent = 'Key无效，点此重设';
+            } else {
+              if (balanceValueEl) balanceValueEl.textContent = '读取失败';
+            }
+            return;
+          }
           if (j.balance_infos && j.balance_infos.length) {
             var info = j.balance_infos[0];
             if (balanceValueEl) balanceValueEl.textContent = '¥ ' + (info.total_balance || '0');
+            if (balanceBoxEl) balanceBoxEl.title = 'DeepSeek 总余额 · 点击刷新';
           } else if (j.error) {
             if (balanceValueEl) balanceValueEl.textContent = 'Key无效，点此重设';
           } else {
@@ -2191,157 +2339,9 @@
     } catch (e) { /* ignore */ }
   }
 
-  /* ---- 右侧本会话提问导航（1:1 复刻 chat.deepseek.com scroll-nav：悬停展开、移开自动回收） ---- */
-  var railWrapEl = null;
-  var railPanelEl = null;
-  var railTimer = null;
-  var lastActiveQ = null;
-
-  function escapeHtml(s) {
-    return String(s).replace(/[&<>"']/g, function (c) {
-      return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c];
-    });
-  }
-
-  function getQuestionItems() {
-    var qs = Array.prototype.slice.call(document.querySelectorAll('.Md3f7G_flowItem[data-chat-flow-kind="user"]'));
-    return qs.slice(0, 120);
-  }
-
-  function buildRail() {
-    var wrap = document.createElement('div');
-    wrap.className = 'neko-rail';
-    wrap.innerHTML =
-      '<div class="neko-rail-bg"></div>' +
-      '<div class="neko-rail-panel">' +
-      '  <div class="neko-rail-list"></div>' +
-      '</div>';
-    document.body.appendChild(wrap);
-    railWrapEl = wrap;
-    railPanelEl = wrap.querySelector('.neko-rail-panel');
-    wrap.title = '会话内容（悬停展开，移开自动收起）';
-
-    wrap.addEventListener('mouseenter', function () {
-      clearTimeout(railTimer);
-      railTimer = setTimeout(openRail, 120);
-    });
-    wrap.addEventListener('pointermove', function () {
-      /* 兜底：高负载下 mouseenter 偶发丢失，指针活动即安排展开（幂等） */
-      if (!railWrapEl || railWrapEl.classList.contains('neko-rail-open')) return;
-      clearTimeout(railTimer);
-      railTimer = setTimeout(openRail, 120);
-    });
-    wrap.addEventListener('mouseleave', function (e) {
-      if (e.relatedTarget && wrap.contains(e.relatedTarget)) return;
-      clearTimeout(railTimer);
-      railTimer = setTimeout(closeRail, 400);
-    });
-    railPanelEl.addEventListener('mouseleave', function (e) {
-      if (e.relatedTarget && wrap.contains(e.relatedTarget)) return;
-      clearTimeout(railTimer);
-      railTimer = setTimeout(closeRail, 400);
-    });
-  }
-
-  function openRail() {
-    if (!railWrapEl) return;
-    railWrapEl.classList.add('neko-rail-open');
-    refreshQuestionList();
-  }
-
-  function closeRail() {
-    if (railWrapEl) railWrapEl.classList.remove('neko-rail-open');
-  }
-
-  function scrollToMessage(el) {
-    var sc = findScrollContainer() || document.querySelector('.wSkVaW_scrollBody');
-    if (!sc) {
-      if (el.scrollIntoView) el.scrollIntoView({ block: 'center', behavior: 'smooth' });
-      return;
-    }
-    var sr = sc.getBoundingClientRect();
-    var er = el.getBoundingClientRect();
-    var top = sc.scrollTop + (er.top - sr.top) - 96;
-    sc.scrollTo({ top: Math.max(0, top), behavior: 'smooth' });
-  }
-
-  function refreshQuestionList() {
-    if (!railPanelEl) return;
-    var list = railPanelEl.querySelector('.neko-rail-list');
-    if (!list) return;
-    list.innerHTML = '';
-    var qs = getQuestionItems();
-    if (!qs.length) {
-      list.innerHTML = '<div class="neko-rail-empty">当前会话还没有提问</div>';
-      return;
-    }
-    for (var i = 0; i < qs.length; i++) {
-      (function (q) {
-        var bubble = q.querySelector('.gdEzaW_bubble');
-        var text = (bubble ? bubble.textContent : q.textContent || '').replace(/\s+/g, ' ').trim().slice(0, 80);
-        if (!text) text = '（无文字消息）';
-        var item = document.createElement('div');
-        item.className = 'neko-rail-item';
-        item.innerHTML =
-          '<span class="neko-rail-item-title">' + escapeHtml(text) + '</span>' +
-          '<span class="neko-rail-item-line"></span>';
-        item.title = text;
-        item.addEventListener('click', function (e) {
-          e.stopPropagation();
-          scrollToMessage(q);
-          closeRail();
-        });
-        list.appendChild(item);
-      })(qs[i]);
-    }
-    lastActiveQ = null;
-    refreshActiveQuestion();
-  }
-
-  /* 滚动时把当前视野内的提问高亮 */
-  function refreshActiveQuestion() {
-    if (!railPanelEl) return;
-    var list = railPanelEl.querySelector('.neko-rail-list');
-    if (!list || !list.children.length || list.firstChild.classList.contains('neko-rail-empty')) return;
-    var sc = findScrollContainer() || document.querySelector('.wSkVaW_scrollBody');
-    if (!sc) return;
-    var qs = getQuestionItems();
-    if (qs.length !== list.children.length) {
-      /* 提问数量变化（新消息/加载更早）：重建列表 */
-      refreshQuestionList();
-      return;
-    }
-    var sr = sc.getBoundingClientRect();
-    var active = null;
-    for (var i = 0; i < qs.length; i++) {
-      var r = qs[i].getBoundingClientRect();
-      if (r.top <= sr.top + 170) active = qs[i]; else break;
-    }
-    if (!active && qs.length) active = qs[0]; /* 在最顶端：高亮第一条 */
-    if (active === lastActiveQ) return;
-    lastActiveQ = active;
-    var items = list.children;
-    for (var j = 0; j < items.length; j++) {
-      items[j].classList.toggle('neko-rail-item-active', qs[j] === active);
-    }
-    if (active) {
-      var idx = qs.indexOf(active);
-      var actItem = items[idx];
-      if (actItem && actItem.scrollIntoView) actItem.scrollIntoView({ block: 'nearest' });
-    }
-  }
-
-  /* ---- 滚动容器查找（提问导航滚动 / 活跃项计算用） ---- */
+  /* ---- 布局节流（滚动 / DOM 变更共用） ---- */
   var lastLayoutRefresh = 0;
 
-  function findScrollContainer() {
-    var cands = ['.wSkVaW_scrollBody', '.Md3f7G_root', '.Md3f7G_scroll', '.Md3f7G_column'];
-    for (var i = 0; i < cands.length; i++) {
-      var el = document.querySelector(cands[i]);
-      if (el && el.scrollHeight > el.clientHeight + 60) return el;
-    }
-    return null;
-  }
 
   /* ---- 猫娘宠物（头像 + 蕾丝圆框 + 悬停互动菜单） ---- */
   var PET_HTML = '' +
@@ -2531,14 +2531,16 @@
     positionBalance();
     setTimeout(refreshBalance, 4000);
     setInterval(refreshBalance, 30 * 60 * 1000);
-    /* 右侧本会话提问导航（回到最新用 DSH 原生按钮，皮肤只做样式） */
-    buildRail();
+    /* HUD 跟随滚动重定位（150ms 节流）；回到最新用 DSH 原生按钮 */
     document.addEventListener('scroll', function () {
       var now = Date.now();
       if (now - lastLayoutRefresh < 150) return;
       lastLayoutRefresh = now;
       positionBalance();
-      refreshActiveQuestion();
+    }, true);
+    /* 点击任何位置时即时重算 HUD（弹层打开/关闭都能及时隐藏/恢复） */
+    document.addEventListener('click', function () {
+      positionBalance();
     }, true);
     /* 截图模式处理 */
     if (window.__nekoShot) {
