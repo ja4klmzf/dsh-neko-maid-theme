@@ -47,15 +47,29 @@ foreach ($root in $Candidates) {
   # ---- copy skin assets (flat into dist/assets) ----
   Copy-Item (Join-Path $AssetsDir '*') $assetsOut -Force
 
-  # ---- generate local DeepSeek API key file (this machine only, never in the repo) ----
+  # ---- generate local API key file (this machine only, never in the repo) ----
   $cred = Join-Path $env:USERPROFILE '.dsh\.credentials.yaml'
   if (Test-Path $cred) {
-    $cm = [regex]::Match((Get-Content $cred -Raw), 'DEEPSEEK_API_KEY:\s*(\S+)')
-    if ($cm.Success) {
-      $keyJs = 'window.__NEKO_DS_KEY__ = "' + $cm.Groups[1].Value + '";'
+    $raw = Get-Content $cred -Raw
+    $ds = [regex]::Match($raw, 'DEEPSEEK_API_KEY:\s*(\S+)')
+    $kimi = [regex]::Match($raw, 'KIMI_CODING_API_KEY:\s*(\S+)')
+    if (-not $kimi.Success) { $kimi = [regex]::Match($raw, 'MOONSHOTAI_CN_API_KEY:\s*(\S+)') }
+    $zai = [regex]::Match($raw, 'ZAI_API_KEY:\s*(\S+)')
+
+    # 兼容旧版 neko-ds-key.js
+    if ($ds.Success) {
+      $keyJs = 'window.__NEKO_DS_KEY__ = "' + $ds.Groups[1].Value + '";'
       [System.IO.File]::WriteAllText((Join-Path $assetsOut 'neko-ds-key.js'), $keyJs, (New-Object System.Text.UTF8Encoding($false)))
-      Write-Host "[OK] local API key file generated"
     }
+
+    # 多供应商 Key：neko-keys.js
+    $parts = @()
+    if ($ds.Success) { $parts += '  deepseek: "' + $ds.Groups[1].Value + '"' }
+    if ($kimi.Success) { $parts += '  kimi: "' + $kimi.Groups[1].Value + '"' }
+    if ($zai.Success) { $parts += '  zai: "' + $zai.Groups[1].Value + '"' }
+    $keysJs = "/* 本机部署专用：由 install.ps1 从 ~/.dsh/.credentials.yaml 生成，勿提交到仓库 */`r`nwindow.__NEKO_KEYS__ = {`r`n" + ($parts -join ",`r`n") + "`r`n};`r`n"
+    [System.IO.File]::WriteAllText((Join-Path $assetsOut 'neko-keys.js'), $keysJs, (New-Object System.Text.UTF8Encoding($false)))
+    Write-Host "[OK] local API key files generated (deepseek/kimi/zai)"
   }
 
   # ---- patch index.html ----
@@ -71,7 +85,9 @@ foreach ($root in $Candidates) {
     $html = $html.Replace('</body>', '<script src="/assets/neko-theme.js" defer></script></body>')
   }
   if ($html -notmatch 'neko-ds-key\.js') {
-    $html = $html.Replace('<script src="/assets/neko-theme.js" defer>', '<script src="/assets/neko-ds-key.js"></script><script src="/assets/neko-theme.js" defer>')
+    $html = $html.Replace('<script src="/assets/neko-theme.js" defer>', '<script src="/assets/neko-ds-key.js"></script><script src="/assets/neko-keys.js"></script><script src="/assets/neko-theme.js" defer>')
+  } elseif ($html -notmatch 'neko-keys\.js') {
+    $html = $html.Replace('<script src="/assets/neko-ds-key.js"></script>', '<script src="/assets/neko-ds-key.js"></script><script src="/assets/neko-keys.js"></script>')
   }
   [System.IO.File]::WriteAllText($idxFile, $html, (New-Object System.Text.UTF8Encoding($false)))
 
