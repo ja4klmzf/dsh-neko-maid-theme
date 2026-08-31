@@ -1,2 +1,5 @@
 # 安装时生成的本地备份，不要上传
 backup/
+# 本机 API Key（由 install.ps1 从 .credentials.yaml 生成），绝不上传
+assets/neko-keys.js
+assets/neko-ds-key.js
