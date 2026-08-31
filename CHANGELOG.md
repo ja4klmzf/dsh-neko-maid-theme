@@ -1,5 +1,39 @@
 # 更新日志 · Changelog
 
+## v1.1.7（2026-09-01）
+
+### 🗑 移除自绘右侧导航
+- 新版 DSH 已自带右侧会话导航，移除皮肤自绘的「本会话提问导航」（含全部 rail 组件、样式与滚动监听），避免与原生导航重复/冲突
+- 猫娘默认右距保持 56px，为 DSH 原生右侧导航让位
+
+## v1.1.6（2026-09-01）
+
+### 🔧 适配 DSH 前端更新（哈希类名变更）
+- DSH 升级后会话 UI 的哈希类名全面更换，皮肤选择器同步更新并**硬化**（改用属性/文本选择器，抗后续升级）：
+  - 提问导航：改用 `[data-chat-flow-kind="user"]` + `[class*="bubble"]`（不再依赖 flowItem/bubble 哈希类）
+  - 回到底部按钮：`EvIC1a_toBottom`（皮肤化 + HUD 避让）
+  - 审批面板：`mna1RW_root`（保留"等待审批"文本兜底）
+  - 轨迹面板 / 侧栏脚区：新增 `[class*="ledger"]`、`[class*="footArea"]` 等兜底选择器
+  - 滚动容器候选：补充 `EvIC1a_scroll` / `TS9iAW_root` / `eGxaPq_scroller`
+  - "harness" 徽章：改用 `svg[viewBox="0 0 182 24"]` 属性选择器（不依赖 hHd-Xa_brand 类）
+- 兼容项保留：composer（wSkVaW_*/uV2eYG_*）、模型选择器（_7KE1Ra_*）、会话树（YDXeBa_*）经核实未变
+
+## v1.1.5（2026-08-27）
+
+### 💰 多供应商余额与单价
+- HUD 按**当前所选模型**自动切换供应商（模型选择器触发按钮上的模型名识别）
+  - **DeepSeek**：峰谷价（元）+ 实时余额（api.deepseek.com）
+  - **Kimi**：官方美元单价（K3 $3/$15、K2.6/K2.7 $0.95/$4、K2.5 $0.6/$3、K2 $0.6/$2.5，按模型名精确匹配）+ 余额（api.moonshot.cn 可用余额）
+  - **GLM（智谱）**：官方美元单价（glm-5.3 $1.4/$4.4、GLM-4.5-Air $0.2/$1.1、GLM-4.6 $0.6/$2.2）+ 余额显示 `--`（无公开接口）
+- 非 DeepSeek 供应商单价框显示绿色 `flat` 样式，悬停可见缓存命中价与数据来源
+
+### 🛡 HUD 避让优化
+- **模型/推理等级/模式选择弹层打开时 HUD 自动隐藏**，关闭后自动恢复（不再遮挡下拉菜单）
+- 修复：DSH 弹层关闭后不卸载、仅淡出（opacity→0）——新增 opacity/pointer-events 判断 + 点击即时重算，HUD 不再被"已关闭的透明菜单"永久隐藏
+
+### 🔧 安装脚本
+- install.ps1 改为从 `.credentials.yaml` 生成 `neko-keys.js`（deepseek/kimi/zai 多 Key）；uninstall 同步清理；`.gitignore` 排除本地 Key 文件
+
 ## v1.1.4（2026-08-26）
 
 ### 🎆 节日彩蛋扩充（4 → 13 个）
