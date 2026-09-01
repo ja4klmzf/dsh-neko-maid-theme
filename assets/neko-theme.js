@@ -1,5 +1,5 @@
 /* ============================================================
-   猫娘女仆主题 v1.1.7 · Neko Maid Theme for DeepSeek Harness Web GUI
+   猫娘女仆主题 v1.2.1 · Neko Maid Theme for DeepSeek Harness Web GUI
    ------------------------------------------------------------
    更新日志：https://github.com/ja4klmzf/dsh-neko-maid-theme/blob/main/CHANGELOG.md
    职责：
@@ -88,7 +88,6 @@
   /* 音效 */
   var audioCtx = null;
   /* 天气 */
-  var rainActive = false;
   var rainTimer = null;
   /* 今日统计 / 生日 */
   var dailyStats = null;
@@ -103,22 +102,22 @@
   var savedPos = null;
 
   var IMGS = {
-    normal: '/assets/neko-pet-avatar.png',
-    pat: '/assets/neko-pet-pat.png',
-    feed: '/assets/neko-pet-feed.png',
-    kiss: '/assets/neko-pet-kiss.png',
-    proud: '/assets/neko-pet-proud.png',
-    pout: '/assets/neko-pet-pout.png',
-    sleep: '/assets/neko-pet-sleep.png',
-    watch: '/assets/neko-pet-watch.png',
-    think: '/assets/neko-pet-think.png',
-    tea: '/assets/neko-pet-tea.png',
-    search: '/assets/neko-pet-search.png',
-    edit: '/assets/neko-pet-edit.png',
-    pwsh: '/assets/neko-pet-pwsh.png',
-    chin: '/assets/neko-pet-chin.png',
-    tail: '/assets/neko-pet-tail.png',
-    jealous: '/assets/neko-pet-jealous.png'
+    normal: '/assets/neko-pet-avatar.webp',
+    pat: '/assets/neko-pet-pat.webp',
+    feed: '/assets/neko-pet-feed.webp',
+    kiss: '/assets/neko-pet-kiss.webp',
+    proud: '/assets/neko-pet-proud.webp',
+    pout: '/assets/neko-pet-pout.webp',
+    sleep: '/assets/neko-pet-sleep.webp',
+    watch: '/assets/neko-pet-watch.webp',
+    think: '/assets/neko-pet-think.webp',
+    tea: '/assets/neko-pet-tea.webp',
+    search: '/assets/neko-pet-search.webp',
+    edit: '/assets/neko-pet-edit.webp',
+    pwsh: '/assets/neko-pet-pwsh.webp',
+    chin: '/assets/neko-pet-chin.webp',
+    tail: '/assets/neko-pet-tail.webp',
+    jealous: '/assets/neko-pet-jealous.webp'
   };
 
   var REACTION_LINES = {
@@ -1125,8 +1124,12 @@
     if (Date.now() >= reactUntil) showDefault();
   }
 
-  /* ---- 天气联动：下雨时提醒带伞 + 雨丝特效 ---- */
-  var RAIN_CODES = [176, 263, 266, 281, 284, 293, 296, 299, 302, 305, 308, 311, 312, 313, 314, 317, 318, 350, 353, 356, 359, 362, 365, 200, 386, 389, 392, 395];
+  /* ---- 天气联动：晴 / 雨 / 雪 / 多云（wttr.in，IP 定位 + WMO 天气码） ---- */
+  var RAIN_CODES = [176, 263, 266, 281, 284, 293, 296, 299, 302, 305, 308, 311, 312, 313, 314, 317, 318, 350, 353, 356, 359, 362, 365, 200];
+  var SNOW_CODES = [179, 182, 185, 227, 230, 320, 321, 322, 323, 324, 325, 326, 327, 328, 329, 332, 333, 334, 335, 338, 368, 369, 370, 371, 374, 375, 376, 377, 386, 387, 388, 389, 392, 393, 394, 395];
+  var weatherState = 'normal';
+  var snowTimer = null;
+
   function checkWeather() {
     try {
       var xhr = new XMLHttpRequest();
@@ -1136,19 +1139,34 @@
         try {
           var j = JSON.parse(xhr.responseText);
           var code = parseInt(j.current_condition[0].weatherCode, 10);
-          var raining = RAIN_CODES.indexOf(code) !== -1;
-          if (raining !== rainActive) {
-            rainActive = raining;
-            if (raining) {
-              showBubble('下雨了，欧尼酱出门要带伞喵~');
-              startRain();
-            }
+          var state = SNOW_CODES.indexOf(code) !== -1 ? 'snow'
+            : RAIN_CODES.indexOf(code) !== -1 ? 'rain'
+            : code === 113 ? 'sunny'
+            : 'normal';
+          if (state !== weatherState) {
+            weatherState = state;
+            applyWeather();
           }
         } catch (e) { /* ignore */ }
       };
       xhr.onerror = function () { /* 网络不通时静默 */ };
       xhr.send();
     } catch (e) { /* ignore */ }
+  }
+
+  function applyWeather() {
+    stopRain();
+    stopSnow();
+    try { document.documentElement.setAttribute('data-neko-weather', weatherState); } catch (e) { /* ignore */ }
+    if (weatherState === 'rain') {
+      showBubble('下雨了，欧尼酱出门要带伞喵~');
+      startRain();
+    } else if (weatherState === 'snow') {
+      showBubble('下雪啦！欧尼酱，咱想和你打雪仗喵~ ❄');
+      startSnow();
+    } else if (weatherState === 'sunny') {
+      showBubble('天气真好喵~ 阳光暖洋洋的，晒晒太阳吧~ ☀');
+    }
   }
 
   function spawnRainDrop() {
@@ -1165,13 +1183,54 @@
     if (rainTimer) return;
     spawnRainDrop();
     rainTimer = setInterval(function () {
-      if (!rainActive) {
+      if (weatherState !== 'rain') {
         clearInterval(rainTimer);
         rainTimer = null;
         return;
       }
       spawnRainDrop();
     }, 220);
+  }
+
+  function stopRain() {
+    if (rainTimer) {
+      clearInterval(rainTimer);
+      rainTimer = null;
+    }
+  }
+
+  function spawnSnowflake() {
+    if (document.querySelectorAll('.neko-snowflake').length > 46) return;
+    var el = document.createElement('span');
+    el.className = 'neko-snowflake';
+    el.textContent = ['❄', '❅', '❆'][Math.floor(Math.random() * 3)];
+    el.style.left = (Math.random() * 98 + 1).toFixed(1) + 'vw';
+    el.style.fontSize = (10 + Math.random() * 14).toFixed(0) + 'px';
+    el.style.setProperty('--sway', ((Math.random() * 160) - 80).toFixed(0) + 'px');
+    var dur = 5 + Math.random() * 5;
+    el.style.animationDuration = dur.toFixed(2) + 's';
+    document.body.appendChild(el);
+    setTimeout(function () { if (el.parentNode) el.parentNode.removeChild(el); }, (dur + 1) * 1000);
+  }
+
+  function startSnow() {
+    if (snowTimer) return;
+    spawnSnowflake();
+    snowTimer = setInterval(function () {
+      if (weatherState !== 'snow') {
+        clearInterval(snowTimer);
+        snowTimer = null;
+        return;
+      }
+      spawnSnowflake();
+    }, 240);
+  }
+
+  function stopSnow() {
+    if (snowTimer) {
+      clearInterval(snowTimer);
+      snowTimer = null;
+    }
   }
 
   /* ---- 生日 / 节日彩蛋 ---- */
@@ -1283,6 +1342,32 @@
         setTimeout(function () { if (n.parentNode) n.parentNode.removeChild(n); }, (dur + 3) * 1000);
       })(el);
     }
+  }
+
+  /* ---- 选择器自诊断：DSH 升级导致界面结构变化时提醒适配 ---- */
+  function diagnoseSelectors() {
+    var checks = [
+      { sel: '.wSkVaW_composerSeat', name: '输入区（HUD 锚定）' },
+      { sel: '.uV2eYG_card', name: '输入框卡片（HUD/猫娘定位）' },
+      { sel: '._7KE1Ra_triggerLabel', name: '模型选择器（供应商识别）' },
+      { sel: '.hHd-Xa_logoRow', name: '侧栏标志行（女仆徽章）' },
+      { sel: '.pI_x6G_sidebarCol', name: '侧栏容器（毛玻璃背景）' }
+    ];
+    var missing = [];
+    for (var i = 0; i < checks.length; i++) {
+      if (!document.querySelector(checks[i].sel)) missing.push(checks[i]);
+    }
+    if (!missing.length) return;
+    var detail = missing.map(function (c) { return '· ' + c.name + '（' + c.sel + '）'; }).join('\n');
+    try { console.warn('[猫娘主题] DSH 界面结构与预期不符，以下功能可能需要适配：\n' + detail); } catch (e) { /* ignore */ }
+    var today = '';
+    try {
+      var d = new Date();
+      today = d.getFullYear() + '-' + (d.getMonth() + 1) + '-' + d.getDate();
+      if (localStorage.getItem('neko-diag-warn') === today) return;
+      localStorage.setItem('neko-diag-warn', today);
+    } catch (e) { /* ignore */ }
+    showBubble('喵？DSH 好像升级了，咱有点跟不上了…（F12 控制台看详情）');
   }
 
   /* ---- 语音问候：仅在刷新页面时说一句（其余不发声，避免打扰） ---- */
@@ -1972,6 +2057,7 @@
   var hudHiddenByMenu = false; /* 模型/推理等级选择弹层遮挡 HUD 时暂时隐藏 */
   var lastHudRect = null; /* 缓存：HUD 最近一次可见位置（弹层遮挡判断用） */
   var lastProvider = null; /* 缓存：当前模型供应商，切换时刷新价格与余额 */
+  var balanceReqId = 0; /* 余额请求序号：丢弃切换供应商后在途的过期响应，避免覆盖新结果 */
 
   function getBalanceKey() {
     if (balanceKey) return balanceKey;
@@ -2115,7 +2201,13 @@
     el.addEventListener('click', function () {
       var provider = detectProvider();
       if (provider === 'glm') {
-        if (balanceValueEl) balanceValueEl.textContent = '--';
+        var zk = getZaiKey();
+        if (!zk) {
+          var zi = window.prompt('请输入智谱(ZAI) API Key（仅保存在本机浏览器）:');
+          if (zi && zi.trim()) setZaiKey(zi.trim());
+        } else {
+          refreshBalance();
+        }
         return;
       }
       var k = provider === 'kimi' ? getKimiKey() : getBalanceKey();
@@ -2148,6 +2240,65 @@
   function setKimiKey(k) {
     try { localStorage.setItem('neko-kimi-key', k); } catch (e) { /* ignore */ }
     refreshBalance();
+  }
+
+  /* 智谱（GLM）Key —— 后付费，用账单 API 聚合本月消费 */
+  function getZaiKey() {
+    try {
+      var k = localStorage.getItem('neko-zai-key');
+      if (k) return k;
+    } catch (e) { /* ignore */ }
+    if (window.__NEKO_KEYS__ && window.__NEKO_KEYS__.zai) return window.__NEKO_KEYS__.zai;
+    return null;
+  }
+
+  function setZaiKey(k) {
+    try { localStorage.setItem('neko-zai-key', k); } catch (e) { /* ignore */ }
+    refreshBalance();
+  }
+
+  function formatTokens(n) {
+    if (n >= 1e6) return (n / 1e6).toFixed(2) + 'M';
+    if (n >= 1e3) return (n / 1e3).toFixed(1) + 'K';
+    return String(n);
+  }
+
+  function glmLedgerMonth() {
+    var d = new Date();
+    return d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+  }
+
+  /* 智谱账单分页拉取 → 聚合本月消费金额与 tokens */
+  function fetchGlmBills(key, month, onDone) {
+    var all = [];
+    function page(p) {
+      var xhr = new XMLHttpRequest();
+      xhr.open('GET', 'https://bigmodel.cn/api/finance/expenseBill/expenseBillList?billingMonth=' + encodeURIComponent(month) + '&pageNum=' + p + '&pageSize=100', true);
+      xhr.setRequestHeader('Authorization', 'Bearer ' + key);
+      xhr.timeout = 15000;
+      xhr.onload = function () {
+        try {
+          var j = JSON.parse(xhr.responseText);
+          if (j.code !== 200) { onDone({ error: j.msg || ('HTTP ' + xhr.status) }); return; }
+          var batch = j.rows || [];
+          all = all.concat(batch);
+          if (batch.length < 100) onDone({ rows: all });
+          else page(p + 1);
+        } catch (e) { onDone({ error: '解析失败' }); }
+      };
+      xhr.onerror = function () { onDone({ error: '网络失败' }); };
+      xhr.send();
+    }
+    page(1);
+  }
+
+  function sumGlmBills(rows) {
+    var sum = 0, tokens = 0;
+    for (var i = 0; i < rows.length; i++) {
+      sum += Number(rows[i].settlementAmount || rows[i].paidAmount || 0);
+      tokens += Number(rows[i].usageCount || 0);
+    }
+    return { sum: sum, tokens: tokens, entries: rows.length };
   }
 
   function positionBalance() {
@@ -2279,16 +2430,35 @@
 
   function refreshBalance() {
     var provider = detectProvider();
+    var reqId = ++balanceReqId;
     /* 标签随供应商切换 */
     if (balanceLabelEl) {
-      balanceLabelEl.textContent = provider === 'glm' ? '🌐 GLM 余额'
+      balanceLabelEl.textContent = provider === 'glm' ? '🌐 GLM 消费'
         : provider === 'kimi' ? '🌙 Kimi 余额'
         : '🐋 DeepSeek 余额';
     }
     if (provider === 'glm') {
-      /* Z.AI / 智谱未提供公开余额接口 */
-      if (balanceValueEl) balanceValueEl.textContent = '--';
-      if (balanceBoxEl) balanceBoxEl.title = 'GLM（智谱）暂未提供余额查询接口，请登录官网控制台查看';
+      /* 智谱后付费，无余额接口：用账单 API 聚合本月消费金额 */
+      var zk = getZaiKey();
+      if (!zk) {
+        if (balanceValueEl) balanceValueEl.textContent = '点此设置Key';
+        if (balanceBoxEl) balanceBoxEl.title = '点击设置智谱(ZAI) API Key';
+        return;
+      }
+      if (balanceValueEl) balanceValueEl.textContent = '查询中...';
+      fetchGlmBills(zk, glmLedgerMonth(), function (res) {
+        if (reqId !== balanceReqId) return; /* 供应商已切换，丢弃过期响应 */
+        if (res.error) {
+          if (balanceValueEl) balanceValueEl.textContent = res.error === '网络失败' ? '网络失败' : 'Key无效，点此重设';
+          if (balanceBoxEl) balanceBoxEl.title = 'GLM（智谱）本月消费查询失败：' + res.error;
+          return;
+        }
+        var s = sumGlmBills(res.rows);
+        if (balanceValueEl) balanceValueEl.textContent = '¥ ' + s.sum.toFixed(2) + ' 本月';
+        if (balanceBoxEl) balanceBoxEl.title = 'GLM（智谱）本月消费（后付费，无余额接口）'
+          + '\n消费 ¥' + s.sum.toFixed(2) + ' · ' + formatTokens(s.tokens) + ' tokens · ' + s.entries + ' 条账单'
+          + '\n点击刷新';
+      });
       return;
     }
     var k = provider === 'kimi' ? getKimiKey() : getBalanceKey();
@@ -2306,6 +2476,7 @@
       xhr.setRequestHeader('Authorization', 'Bearer ' + k);
       xhr.timeout = 15000;
       xhr.onload = function () {
+        if (reqId !== balanceReqId) return; /* 供应商已切换，丢弃过期响应 */
         try {
           var j = JSON.parse(xhr.responseText);
           if (provider === 'kimi') {
@@ -2333,6 +2504,7 @@
         }
       };
       xhr.onerror = function () {
+        if (reqId !== balanceReqId) return; /* 供应商已切换，丢弃过期响应 */
         if (balanceValueEl) balanceValueEl.textContent = '网络失败';
       };
       xhr.send();
@@ -2347,7 +2519,7 @@
   var PET_HTML = '' +
     '<div class="neko-pet-holder">' +
     '<div class="neko-pet-frame">' +
-    '<img class="neko-pet-img" src="/assets/neko-pet-avatar.png" alt="洛丽塔猫娘" draggable="false" />' +
+    '<img class="neko-pet-img" src="/assets/neko-pet-avatar.webp" alt="洛丽塔猫娘" draggable="false" />' +
     '</div>' +
     '<div class="neko-pet-menu" role="menu">' +
     '<button type="button" class="neko-menu-btn" data-kind="feed" title="投喂小鱼干"><span>🐟</span><i>投喂</i></button>' +
@@ -2464,25 +2636,6 @@
         petWrap.classList.remove('neko-menu-open');
       }, 650);
     });
-
-    var rect = petWrap.getBoundingClientRect();
-    var bokehSpots = [
-      [-96, -220, 44], [96, -304, 28], [268, -92, 32], [304, 128, 36],
-      [-140, 64, 24], [36, -60, 22], [352, -220, 30], [-64, -92, 20]
-    ];
-    for (var k = 0; k < bokehSpots.length; k++) {
-      var b = document.createElement('span');
-      b.className = 'neko-bokeh';
-      var spot = bokehSpots[k];
-      var size = spot[2];
-      b.style.left = (rect.left + rect.width / 2 + spot[0]).toFixed(0) + 'px';
-      b.style.top = (rect.top + rect.height / 2 + spot[1]).toFixed(0) + 'px';
-      b.style.width = size + 'px';
-      b.style.height = size + 'px';
-      b.style.animationDuration = (4.5 + Math.random() * 3).toFixed(2) + 's';
-      b.style.animationDelay = (-Math.random() * 6).toFixed(2) + 's';
-      document.body.appendChild(b);
-    }
   }
 
   function init() {
@@ -2506,6 +2659,8 @@
     checkBirthday();
     /* 节日彩蛋 */
     checkFestival();
+    /* 选择器自诊断：DSH 升级导致界面结构变化时，提醒适配（气泡每天最多提示一次） */
+    setTimeout(diagnoseSelectors, 6000);
     /* 语音问候：仅刷新页面时一句；若被浏览器拦截，首次点击页面时再试 */
     try {
       if (window.speechSynthesis) {
