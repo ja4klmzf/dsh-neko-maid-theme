@@ -16,17 +16,13 @@ foreach ($c in @($c1, $c2, $c3)) {
 $Candidates = @($Candidates | Select-Object -Unique)
 if ($Dist) { $Candidates = @($Dist) }
 
+$petNames = @('avatar','pat','feed','kiss','proud','pout','sleep','watch','think','tea','search','edit','pwsh','chin','tail','jealous')
 $skinFiles = @(
   'override.css', 'neko-theme.js',
-  'neko-bg-day.jpg', 'neko-bg-night.jpg',
-  'neko-pet-lace.svg', 'neko-pet-lace-day.svg',
-  'neko-pet-avatar.png', 'neko-pet-pat.png', 'neko-pet-feed.png',
-  'neko-pet-kiss.png', 'neko-pet-proud.png', 'neko-pet-pout.png',
-  'neko-pet-sleep.png', 'neko-pet-watch.png', 'neko-pet-think.png',
-  'neko-pet-tea.png', 'neko-pet-search.png', 'neko-pet-edit.png',
-  'neko-pet-pwsh.png', 'neko-pet-chin.png', 'neko-pet-tail.png',
-  'neko-pet-jealous.png', 'neko-ds-key.js', 'neko-keys.js'
+  'neko-bg-day.webp', 'neko-bg-night.webp', 'neko-bg-day.jpg', 'neko-bg-night.jpg',
+  'neko-pet-lace.svg', 'neko-pet-lace-day.svg', 'neko-ds-key.js', 'neko-keys.js'
 )
+foreach ($n in $petNames) { $skinFiles += "neko-pet-$n.webp"; $skinFiles += "neko-pet-$n.png" }
 
 $idxBak = Get-ChildItem $BackupDir -Filter 'index-*.html.bak' -ErrorAction SilentlyContinue |
   Sort-Object Name -Descending | Select-Object -First 1
