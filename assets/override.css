@@ -1,11 +1,11 @@
 /* ============================================================
-   猫娘女仆主题 v1.1.7 · Neko Day/Night Skin for DeepSeek Harness Web GUI
+   猫娘女仆主题 v1.2.1 · Neko Day/Night Skin for DeepSeek Harness Web GUI
    ------------------------------------------------------------
    灵感组合自 Deep Whale 昼夜主题（水晶白昼 / 月潮夜晚 / 玻璃面板 /
    花边 / 动态氛围 / Q版宠物），宠物与素材为 ComfyUI 生成的原创猫娘。
 
    用法（见 install.ps1 / install.bat）：
-     1. 把 override.css / neko-theme.js / neko-bg-day.jpg / neko-bg-night.jpg 放到
+     1. 把 override.css / neko-theme.js / neko-bg-day.webp / neko-bg-night.webp 放到
         dsh-web-frontend/dist/assets/
      2. dist/index.html 里引入：
           <link rel="stylesheet" href="/assets/override.css?v=N">
@@ -315,7 +315,7 @@ html[data-neko="night"] body {
 .neko-bg-day {
   background-image:
     linear-gradient(rgba(255, 247, 240, 0.04), rgba(255, 232, 222, 0.14)),
-    url("/assets/neko-bg-day.jpg");
+    url("/assets/neko-bg-day.webp");
   opacity: 1;
   transition: opacity 0.9s ease;
   animation: neko-bg-zoom 70s ease-in-out infinite alternate;
@@ -323,7 +323,7 @@ html[data-neko="night"] body {
 .neko-bg-night {
   background-image:
     linear-gradient(rgba(12, 7, 28, 0.12), rgba(20, 10, 44, 0.2)),
-    url("/assets/neko-bg-night.jpg");
+    url("/assets/neko-bg-night.webp");
   opacity: 0;
   transition: opacity 0.9s ease;
   animation: neko-bg-zoom 84s ease-in-out infinite alternate;
@@ -364,7 +364,8 @@ html[data-neko="night"] .neko-bg-day { opacity: 0; }
 .wSkVaW_scrollBody {
   background: transparent !important;
 }
-.ydkMvW_root {
+.ydkMvW_root,
+.pI_x6G_detailsCol {
   background: var(--neko-glass-side) !important;
 }
 
@@ -828,24 +829,44 @@ html[data-neko="night"] .neko-pet-img {
   0%, 100% { transform: translateY(0); }
   50% { transform: translateY(-7px); }
 }
-/* 梦幻光斑（午后阳光 bokeh，围绕萌妹浮动；夜间化为月尘） */
-.neko-bokeh {
+/* ============================================================
+   天气联动：晴 / 雨 / 雪 / 多云（data-neko-weather 由 neko-theme.js 维护）
+   ============================================================ */
+/* 晴天：背景微提亮、右上角太阳光晕 */
+html[data-neko-weather="sunny"] .neko-bg-day {
+  filter: saturate(1.1) brightness(1.05);
+}
+html[data-neko-weather="sunny"] .neko-bg-day::after {
+  content: "";
   position: fixed;
-  z-index: 1190;
+  top: -14vmin;
+  right: -8vmin;
+  width: 44vmin;
+  height: 44vmin;
   border-radius: 50%;
   pointer-events: none;
-  background: radial-gradient(circle at 35% 35%, rgba(255, 238, 208, 0.95), rgba(255, 205, 158, 0.35) 62%, rgba(255, 205, 158, 0) 75%);
-  animation: neko-bokeh-float 6s ease-in-out infinite;
-  filter: blur(0.5px);
+  z-index: 6;
+  background: radial-gradient(circle, rgba(255, 216, 148, 0.42), rgba(255, 216, 148, 0) 62%);
 }
-html[data-neko="night"] .neko-bokeh {
-  opacity: 0.45;
-  background: radial-gradient(circle at 35% 35%, rgba(255, 240, 250, 0.9), rgba(200, 170, 240, 0.3) 62%, rgba(200, 170, 240, 0) 75%);
+/* 雨天：氛围变冷变暗（雨丝由 JS 生成） */
+/* 雪天：雪花飘落（冷色氛围） */
+.neko-snowflake {
+  position: fixed;
+  top: -30px;
+  z-index: 5;
+  pointer-events: none;
+  color: #fff;
+  opacity: 0;
+  text-shadow: 0 0 6px rgba(180, 210, 255, 0.65);
+  animation: neko-snow-fall linear forwards;
 }
-@keyframes neko-bokeh-float {
-  0%, 100% { transform: translate(0, 0) scale(1); opacity: 0.45; }
-  50% { transform: translate(7px, -16px) scale(1.2); opacity: 0.9; }
+@keyframes neko-snow-fall {
+  0% { transform: translate(0, -20px) rotate(0deg); opacity: 0; }
+  8% { opacity: 0.95; }
+  90% { opacity: 0.85; }
+  100% { transform: translate(var(--sway, 40px), 105vh) rotate(540deg); opacity: 0; }
 }
+
 .neko-pet-bubble {
   position: absolute;
   bottom: 584px;
@@ -1032,13 +1053,16 @@ html[data-neko="night"] svg[viewBox="0 0 182 24"] path[fill="var(--dsw-alias-lab
 @media (prefers-reduced-motion: reduce) {
   .neko-petal, .neko-star, .neko-moon, .neko-comet,
   .neko-bg-day, .neko-bg-night, .neko-pet-holder,
-  .neko-bokeh, .neko-floaty, .neko-pet-img.pop {
+  .neko-floaty, .neko-pet-img.pop {
     animation: none !important;
   }
   .neko-rain-text {
     display: none !important;
   }
   .neko-raindrop {
+    animation: none !important;
+  }
+  .neko-snowflake {
     animation: none !important;
   }
 }
