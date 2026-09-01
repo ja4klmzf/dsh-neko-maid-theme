@@ -47,6 +47,15 @@ foreach ($root in $Candidates) {
   # ---- copy skin assets (flat into dist/assets) ----
   Copy-Item (Join-Path $AssetsDir '*') $assetsOut -Force
 
+  # ---- cleanup legacy PNG/JPG assets (superseded by WebP) ----
+  $legacy = @('neko-bg-day.jpg', 'neko-bg-night.jpg')
+  Get-ChildItem $AssetsDir -Filter 'neko-pet-*.webp' | ForEach-Object {
+    $legacy += ($_.Name -replace '\.webp$', '.png')
+  }
+  foreach ($lf in $legacy) {
+    Remove-Item (Join-Path $assetsOut $lf) -Force -ErrorAction SilentlyContinue
+  }
+
   # ---- generate local API key file (this machine only, never in the repo) ----
   $cred = Join-Path $env:USERPROFILE '.dsh\.credentials.yaml'
   if (Test-Path $cred) {
